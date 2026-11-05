@@ -1,0 +1,183 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-obsidian: #0a0910;
+    --bg-charcoal: #14121e;
+    --bg-cream: #f5f2eb;
+    --bg-paper: #faf8f4;
+    --portrait-orchid: #b86bd4;
+    --portrait-amber: #f1b39c;
+    --portrait-sky: #7ca6e8;
+    --portrait-slate: #5c4577;
+    --portrait-indigo: #344975;
+    --portrait-deep: #17121f;
+  }
+
+  html {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    scroll-behavior: smooth;
+    background-color: #0a0910;
+    color: #f5f2eb;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-display {
+    font-family: 'Sora', 'Space Grotesk', sans-serif;
+  }
+
+  .font-hero {
+    font-family: 'Archivo Black', 'Sora', sans-serif;
+  }
+
+  .font-impact {
+    font-family: 'Anton', 'Archivo Black', 'Sora', sans-serif;
+  }
+
+  .font-script {
+    font-family: 'Kaushan Script', 'Dancing Script', cursive;
+  }
+}
+
+/*
+ * HIGH-RESOLUTION IMAGE SHARPNESS & RENDERING PIPELINE
+ * - image-rendering: -webkit-optimize-contrast preserves sharp typography, logos, and high contrast edges
+ * - image-rendering: high-quality instructs modern browsers to use high-precision bicubic/lanczos filtering
+ * - transform: translateZ(0) / backface-visibility: hidden prevents GPU texture downsampling blur
+ */
+img,
+picture {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: high-quality;
+}
+
+.project-image-high-res {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: high-quality;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Sharp rendering for vector SVG graphics across logos and identity books */
+svg,
+img[src$='.svg'] {
+  shape-rendering: geometricPrecision;
+  text-rendering: geometricPrecision;
+}
+
+/* Custom Subtle Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0910;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2d2842;
+  border-radius: 9999px;
+  border: 2px solid #0a0910;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7ca6e8;
+}
+
+/* 3D Perspective & Depth Utilities */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.perspective-1600 {
+  perspective: 1600px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+/*
+ * 100% LIGHT PORTRAIT-INSPIRED FLAT GRADIENT FOR "BRAND IDENTITY" HERO BACKGROUND TYPOGRAPHY
+ * Same portrait-inspired color family and gradient direction, elevated to 100% light brightness:
+ * - Left Light Orchid-Pink & Pastel Lavender (#FFD6FF -> #EED2FF)
+ * - Center Light Rose-Blush & Warm Cream-Peach (#FFDCEB -> #FFEAD9)
+ * - Right Light Periwinkle & Ice Sky-Blue (#D6E8FF -> #C7F4FF)
+ * Pure flat gradient fill — ZERO drop-shadow, ZERO glow, ZERO text-shadow.
+ */
+.hero-brand-identity-gradient {
+  background-image: linear-gradient(90deg, #df00ff 0%, #00bdff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: none;
+  text-shadow: none;
+  box-shadow: none;
+}
+
+/* Selected Display Accent Gradient Matching Brand Colors (#DF00FF -> #00BDFF) */
+.brand-title-gradient {
+  background-image: linear-gradient(90deg, #df00ff 0%, #00bdff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.brand-title-gradient-light {
+  background-image: linear-gradient(90deg, #df00ff 0%, #00bdff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Portrait bottom fade mask for seamless integration into the dark stage */
+.portrait-stage-mask {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 84%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 84%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+/* Architectural Studio Grid Overlay */
+.studio-grid-dark {
+  background-size: 64px 64px;
+  background-image:
+    linear-gradient(to right, rgba(245, 242, 235, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(245, 242, 235, 0.025) 1px, transparent 1px);
+}
+
+.studio-grid-light {
+  background-size: 64px 64px;
+  background-image:
+    linear-gradient(to right, rgba(23, 18, 31, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(23, 18, 31, 0.04) 1px, transparent 1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

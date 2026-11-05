@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200"><rect width="1600" height="1200" fill="#F3EEE6"/>
+    <text x="90" y="130" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#111114" font-weight="700" letter-spacing="5" text-anchor="start" opacity="0.7">BRAND GUIDELINES</text>
+    <text x="1510" y="130" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#111114" font-weight="700" letter-spacing="4" text-anchor="end" opacity="0.7">00</text>
+    <rect x="90" y="152" width="1420" height="2" fill="#111114" opacity="0.25"/>
+    
+    <text x="90" y="560" font-family="Arial, Helvetica, sans-serif" font-size="150" fill="#111114" font-weight="700" letter-spacing="-4" text-anchor="start" opacity="1">Brand</text>
+    <text x="90" y="720" font-family="Arial, Helvetica, sans-serif" font-size="150" fill="#111114" font-weight="700" letter-spacing="-4" text-anchor="start" opacity="1">Guidelines</text>
+    <rect x="94" y="790" width="140" height="10" fill="#C9A45C"/>
+    <text x="94" y="870" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#111114" font-weight="400" letter-spacing="1" text-anchor="start" opacity="0.65">Identity System  /  Version 1.0</text>
+    <g>
+    <defs><clipPath id="vb00"><circle cx="1123.5" cy="560" r="144.5"/></clipPath></defs>
+    <circle cx="1276.5" cy="560" r="144.5" fill="#C9A45C" clip-path="url(#vb00)"/>
+    <circle cx="1123.5" cy="560" r="144.5" fill="none" stroke="#111114" stroke-width="15.299999999999999"/>
+    <circle cx="1276.5" cy="560" r="144.5" fill="none" stroke="#111114" stroke-width="15.299999999999999"/></g>
+  <g>
+    <rect x="60" y="60" width="289.8" height="50.6" rx="25.3" fill="none" stroke="#111114" stroke-opacity="0.45" stroke-width="1.9200000000000002"/>
+    <circle cx="85.3" cy="85.3" r="7.36" fill="#C9A45C"/>
+    <text x="103.69999999999999" y="94.03999999999999" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#111114" font-weight="700" letter-spacing="2.76" text-anchor="start" opacity="1">DEMO PLACEHOLDER</text>
+    <text x="1540" y="94.03999999999999" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#111114" font-weight="700" letter-spacing="2.76" text-anchor="end" opacity="0.7">BRAND STYLE GUIDE  01</text>
+    <text x="60" y="1140" font-family="Arial, Helvetica, sans-serif" font-size="19.55" fill="#111114" font-weight="400" letter-spacing="0.92" text-anchor="start" opacity="0.55">Replace with your design  /  public/images/portfolio/brand-guidelines/brand-guideline-01.svg</text>
+  </g></svg>

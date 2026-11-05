@@ -1,0 +1,549 @@
+{
+  "------------1-1793828015115.jpg": {
+    "origWidth": 3240,
+    "origHeight": 4320,
+    "aspectRatio": 0.75,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      3240
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "------------2-1793828029025.jpg": {
+    "origWidth": 3240,
+    "origHeight": 4320,
+    "aspectRatio": 0.75,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      3240
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "------------3-1793828035515.jpg": {
+    "origWidth": 3240,
+    "origHeight": 4320,
+    "aspectRatio": 0.75,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      3240
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "------------4-1793828042369.jpg": {
+    "origWidth": 3240,
+    "origHeight": 4320,
+    "aspectRatio": 0.75,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      3240
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "------------5-1793828049046.jpg": {
+    "origWidth": 3240,
+    "origHeight": 4320,
+    "aspectRatio": 0.75,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      3240
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "------------6-1793828055547.jpg": {
+    "origWidth": 3240,
+    "origHeight": 4320,
+    "aspectRatio": 0.75,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      3240
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "------------7-1793828063451.jpg": {
+    "origWidth": 3240,
+    "origHeight": 4320,
+    "aspectRatio": 0.75,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      3240
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "------------8-1793828068949.jpg": {
+    "origWidth": 3240,
+    "origHeight": 4320,
+    "aspectRatio": 0.75,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      3240
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "------------all-1793828007775.jpg": {
+    "origWidth": 4320,
+    "origHeight": 2880,
+    "aspectRatio": 1.5,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      4320
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "58ce6cc8-e138-410a-a384-1edbfe4f1ef3-1793843765328-ys5gc.png": {
+    "origWidth": 1536,
+    "origHeight": 1024,
+    "aspectRatio": 1.5,
+    "widths": [
+      480,
+      800,
+      1200,
+      1536
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "all-file-1793844745812-81q7d.jpg": {
+    "origWidth": 4000,
+    "origHeight": 3473,
+    "aspectRatio": 1.151742009789807,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      4000
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "all-file-1793877564432-esdza.jpg": {
+    "origWidth": 4000,
+    "origHeight": 3473,
+    "aspectRatio": 1.151742009789807,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      4000
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "cat---mouse-file-01-1793843554441-q235h.jpg": {
+    "origWidth": 3456,
+    "origHeight": 4032,
+    "aspectRatio": 0.8571428571428571,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      3456
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "f9059fdb-7711-44f2-894b-55d4a4d012e4-1793843511826-pa9d9.png": {
+    "origWidth": 1717,
+    "origHeight": 916,
+    "aspectRatio": 1.8744541484716157,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      1717
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "file-01-1793844812927-h0j5g.jpg": {
+    "origWidth": 6400,
+    "origHeight": 3600,
+    "aspectRatio": 1.7777777777777777,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      6400
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "file-01-1793877570432-mra7s.jpg": {
+    "origWidth": 6400,
+    "origHeight": 3600,
+    "aspectRatio": 1.7777777777777777,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      6400
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "file-01-1793877588380-13ls0.jpg": {
+    "origWidth": 6400,
+    "origHeight": 3600,
+    "aspectRatio": 1.7777777777777777,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      6400
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "file-02-1793844757926-elxuy.jpg": {
+    "origWidth": 6400,
+    "origHeight": 3600,
+    "aspectRatio": 1.7777777777777777,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      6400
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "file-02-1793877592891-8abpa.jpg": {
+    "origWidth": 6400,
+    "origHeight": 3600,
+    "aspectRatio": 1.7777777777777777,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      6400
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "file-03-1793844776454-m1ccp.jpg": {
+    "origWidth": 6400,
+    "origHeight": 3600,
+    "aspectRatio": 1.7777777777777777,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      6400
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "file-04-1793844803646-j3hmd.jpg": {
+    "origWidth": 6400,
+    "origHeight": 3600,
+    "aspectRatio": 1.7777777777777777,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      6400
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "file-05-1793844768442-tw5kq.jpg": {
+    "origWidth": 6400,
+    "origHeight": 3600,
+    "aspectRatio": 1.7777777777777777,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      6400
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "flyer-01-02-1793844344712-45mgz.jpg": {
+    "origWidth": 2975,
+    "origHeight": 4210,
+    "aspectRatio": 0.7066508313539193,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      2975
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "flyer-01-1793844356262-amp64.jpg": {
+    "origWidth": 2975,
+    "origHeight": 4210,
+    "aspectRatio": 0.7066508313539193,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      2975
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "flyer-02-1793844395134-yb68b.jpg": {
+    "origWidth": 2975,
+    "origHeight": 4210,
+    "aspectRatio": 0.7066508313539193,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      2975
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "flyer-mockup-1793844331245-gensk.jpg": {
+    "origWidth": 5000,
+    "origHeight": 3500,
+    "aspectRatio": 1.4285714285714286,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      5000
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "free-poster-on-a-concrete-stairs-mockup-1793844368923-mpsdv.jpg": {
+    "origWidth": 4500,
+    "origHeight": 3000,
+    "aspectRatio": 1.5,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      4500
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "free-poster-on-a-concrete-stairs-mockup2-1793844414569-hv1uy.jpg": {
+    "origWidth": 4500,
+    "origHeight": 3000,
+    "aspectRatio": 1.5,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      4500
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "free_baseball_cap_mockup_3-1793843570821-o4hbq.jpg": {
+    "origWidth": 3000,
+    "origHeight": 2250,
+    "aspectRatio": 1.3333333333333333,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3000
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "free_sweatshirt_mockup_1-1793843561681-5210m.jpg": {
+    "origWidth": 3000,
+    "origHeight": 2250,
+    "aspectRatio": 1.3333333333333333,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3000
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "free_t-shirt_mannequin_mockup_1-1793843546102-9fyob.jpg": {
+    "origWidth": 4211,
+    "origHeight": 3945,
+    "aspectRatio": 1.0674271229404309,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      4211
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "hanging-t-shirt-mockup-1793843579273-7dt4h.jpg": {
+    "origWidth": 4000,
+    "origHeight": 3328,
+    "aspectRatio": 1.2019230769230769,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      4000
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "nayem-1793826230488.jpg": {
+    "origWidth": 2000,
+    "origHeight": 2000,
+    "aspectRatio": 1,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2000
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "nayem-2-1793826237301.jpg": {
+    "origWidth": 4096,
+    "origHeight": 4096,
+    "aspectRatio": 1,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      3200,
+      4096
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  },
+  "untitled-1-1793843700009-h5uwx.jpg": {
+    "origWidth": 2424,
+    "origHeight": 1896,
+    "aspectRatio": 1.2784810126582278,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600,
+      2400,
+      2424
+    ],
+    "hasWebp": true,
+    "hasAvif": true
+  }
+}

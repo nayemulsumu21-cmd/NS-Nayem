@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="#EAD1C5"/>
+    <circle cx="540" cy="560" r="380" fill="none" stroke="#C9A45C" stroke-width="22"/><circle cx="540" cy="560" r="300" fill="none" stroke="#3B2633" stroke-width="22"/><circle cx="540" cy="560" r="220" fill="none" stroke="#C9A45C" stroke-width="22"/><circle cx="540" cy="560" r="140" fill="none" stroke="#3B2633" stroke-width="22"/>
+    <circle cx="540" cy="560" r="60" fill="#3B2633"/>
+    <text x="540" y="1080" font-family="Arial, Helvetica, sans-serif" font-size="104" fill="#3B2633" font-weight="700" letter-spacing="-2" text-anchor="middle" opacity="1">CAMPAIGN</text>
+    <rect x="350" y="1130" width="380" height="14" fill="#3B2633" opacity="0.5"/>
+  <g>
+    <rect x="54" y="54" width="264.59999999999997" height="46.2" rx="23.1" fill="none" stroke="#111114" stroke-opacity="0.45" stroke-width="1.728"/>
+    <circle cx="77.1" cy="77.1" r="6.72" fill="#C9A45C"/>
+    <text x="93.9" y="85.08" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#111114" font-weight="700" letter-spacing="2.52" text-anchor="start" opacity="1">DEMO PLACEHOLDER</text>
+    <text x="1026" y="85.08" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#111114" font-weight="700" letter-spacing="2.52" text-anchor="end" opacity="0.7">SOCIAL MEDIA  06</text>
+    <text x="54" y="1296" font-family="Arial, Helvetica, sans-serif" font-size="17.849999999999998" fill="#111114" font-weight="400" letter-spacing="0.84" text-anchor="start" opacity="0.55">Replace with your design  /  public/images/portfolio/social-media/social-06.svg</text>
+  </g></svg>

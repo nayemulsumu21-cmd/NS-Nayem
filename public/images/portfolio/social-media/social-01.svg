@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350"><rect width="1080" height="1350" fill="#B65E3C"/>
+    <circle cx="540" cy="520" r="330" fill="#F3EEE6"/>
+    <rect x="430" y="330" width="220" height="380" rx="40" fill="#111114"/>
+    <rect x="480" y="380" width="120" height="16" rx="8" fill="#C9A45C"/>
+    <text x="540" y="1000" font-family="Arial, Helvetica, sans-serif" font-size="92" fill="#F3EEE6" font-weight="700" letter-spacing="-2" text-anchor="middle" opacity="1">NEW LAUNCH</text>
+    <rect x="340" y="1040" width="400" height="14" fill="#F3EEE6" opacity="0.6"/>
+    <rect x="410" y="1100" width="260" height="70" rx="35" fill="#111114"/>
+    <text x="540" y="1145" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#F3EEE6" font-weight="700" letter-spacing="4" text-anchor="middle" opacity="1">SHOP NOW</text>
+  <g>
+    <rect x="54" y="54" width="264.59999999999997" height="46.2" rx="23.1" fill="none" stroke="#111114" stroke-opacity="0.45" stroke-width="1.728"/>
+    <circle cx="77.1" cy="77.1" r="6.72" fill="#C9A45C"/>
+    <text x="93.9" y="85.08" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#111114" font-weight="700" letter-spacing="2.52" text-anchor="start" opacity="1">DEMO PLACEHOLDER</text>
+    <text x="1026" y="85.08" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#111114" font-weight="700" letter-spacing="2.52" text-anchor="end" opacity="0.7">SOCIAL MEDIA  01</text>
+    <text x="54" y="1296" font-family="Arial, Helvetica, sans-serif" font-size="17.849999999999998" fill="#111114" font-weight="400" letter-spacing="0.84" text-anchor="start" opacity="0.55">Replace with your design  /  public/images/portfolio/social-media/social-01.svg</text>
+  </g></svg>

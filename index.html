@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NAYEMUL ISLAM — Brand Identity Designer | Graphic Design Portfolio</title>
+    <meta
+      name="description"
+      content="Portfolio of NAYEMUL ISLAM, Brand Identity Designer & Graphic Designer specializing in Logo Design, Brand Style Guides, and Social Media Post Design. Available for freelance work."
+    />
+    <meta name="author" content="NAYEMUL ISLAM" />
+    <meta name="theme-color" content="#0C0C0E" />
+    <link rel="preload" as="image" href="/images/profile/hero-portrait.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="NAYEMUL ISLAM — Brand Identity Designer" />
+    <meta
+      property="og:description"
+      content="Creating meaningful visual identities, distinctive logo designs, brand style guides, and engaging social media visuals."
+    />
+    <meta property="og:type" content="website" />
+
+    <!-- Premium Typography + Script Greeting Font (Kaushan Script, Dancing Script, Archivo Black, Anton, Sora, Space Grotesk, Plus Jakarta Sans, Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Dancing+Script:wght@600;700&family=Inter:wght@300;400;500;600;700&family=Kaushan+Script&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Force browser to disable automatic scroll restoration and always start at the top on refresh -->
+    <script>
+      (function () {
+        if ('scrollRestoration' in history) {
+          history.scrollRestoration = 'manual';
+        }
+        try {
+          document.documentElement.style.scrollBehavior = 'auto';
+          window.scrollTo(0, 0);
+          document.documentElement.scrollTop = 0;
+          if (document.body) {
+            document.body.scrollTop = 0;
+          }
+        } catch (_) {}
+        window.addEventListener('beforeunload', function () {
+          window.scrollTo(0, 0);
+        });
+      })();
+    </script>
+  </head>
+  <body class="bg-obsidian text-cream antialiased selection:bg-gold selection:text-obsidian overflow-x-hidden">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

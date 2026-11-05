@@ -1,0 +1,1107 @@
+export type ProjectCategory = string;
+
+export type FilterCategory = 'all' | string;
+
+export interface CategoryTabItem {
+  id: FilterCategory;
+  code: string;
+  label: string;
+  shortDesc: string;
+  isSystemAll?: boolean;
+}
+
+export type ProjectContentBlockType =
+  | 'image'
+  | 'heading'
+  | 'text'
+  | 'photo-grid';
+
+export interface ProjectContentBlock {
+  id: string;
+  type: ProjectContentBlockType;
+  /** Used by 'image' block */
+  imageUrl?: string;
+  caption?: string;
+  layout?: 'full' | 'contained';
+  /** Used by 'heading' and 'text' blocks */
+  text?: string;
+  subtext?: string;
+  align?: 'left' | 'center';
+  /** Used by 'photo-grid' block */
+  columns?: 2 | 3;
+  gridImages?: { id: string; url: string; caption?: string }[];
+}
+
+export interface ProjectCoverCrop {
+  zoom: number;
+  offsetX: number;
+  offsetY: number;
+}
+
+export interface ProjectCanvasStyle {
+  backgroundColor: string;
+  blockSpacing: number;
+  maxWidth: 'full' | 'wide' | 'standard';
+}
+
+export interface ProjectDraftSnapshot {
+  title: string;
+  category: ProjectCategory;
+  categoryLabel: string;
+  thumbnail: string;
+  fullImage: string;
+  coverCrop?: ProjectCoverCrop;
+  sheets?: { label: string; image: string }[];
+  contentBlocks?: ProjectContentBlock[];
+  canvasStyle?: ProjectCanvasStyle;
+  description: string;
+  tags?: string[];
+  featured: boolean;
+  tools: string[];
+  deliverables: string[];
+  savedAt: string;
+}
+
+export interface ProjectItem {
+  id: string;
+  title: string;
+  category: ProjectCategory;
+  categoryLabel: string;
+  thumbnail: string;
+  fullImage: string;
+  /** Optional cover image crop/framing settings for the uniform 4:3 homepage grid card */
+  coverCrop?: ProjectCoverCrop;
+  /** Optional featured wide showcase cover for the Featured Works slider */
+  featuredCover?: string;
+  /** Optional multi-sheet preview images (e.g., for Brand Style Guides) */
+  sheets?: { label: string; image: string }[];
+  /** Rich Behance-style ordered content blocks created in the Project Builder */
+  contentBlocks?: ProjectContentBlock[];
+  /** Custom presentation style for the project canvas */
+  canvasStyle?: ProjectCanvasStyle;
+  description: string;
+  /** Project tags / keywords */
+  tags?: string[];
+  featured: boolean;
+  displayOrder: number;
+  /** Controls dynamic editorial layout sizing in the portfolio gallery */
+  editorialSpan: 'wide' | 'tall' | 'standard' | 'feature';
+  aspectRatio: '1/1' | '4/3' | '4/5' | '16/10';
+  tools: string[];
+  deliverables: string[];
+  /** Publication status: 'published' projects appear publicly; 'draft' projects stay in dashboard */
+  status?: 'published' | 'draft';
+  /** Controls whether the project is publicly visible in the gallery */
+  visible?: boolean;
+  /** Optional staged edits saved via "Save Changes" without publishing publicly yet */
+  unpublishedDraft?: ProjectDraftSnapshot;
+  /** Timestamp of last update */
+  updatedAt?: string;
+  /** Timestamp when project was saved */
+  savedAt?: string;
+  /** Real recorded project view count */
+  views?: number;
+  /** Real recorded project like count */
+  likes?: number;
+  /** Real recorded project appreciation count */
+  appreciations?: number;
+}
+
+export function getProjectBlocks(project: ProjectItem): ProjectContentBlock[] {
+  if (project.contentBlocks && project.contentBlocks.length > 0) {
+    return project.contentBlocks.map((b) =>
+      b.type === 'image' ? { ...b, layout: b.layout || 'full' } : b
+    );
+  }
+  if (project.sheets && project.sheets.length > 0) {
+    return project.sheets.map((sheet, idx) => ({
+      id: `${project.id}-sheet-${idx + 1}`,
+      type: 'image',
+      imageUrl: sheet.image,
+      caption: sheet.label,
+      layout: 'full',
+    }));
+  }
+  return [
+    {
+      id: `${project.id}-main-image`,
+      type: 'image',
+      imageUrl: project.fullImage || project.thumbnail,
+      caption: project.title,
+      layout: 'full',
+    },
+  ];
+}
+
+export const CATEGORY_TABS: CategoryTabItem[] = [
+  {
+    id: 'all',
+    code: '01',
+    label: 'ALL DESIGNS',
+    shortDesc: 'Complete curated portfolio',
+    isSystemAll: true,
+  },
+  {
+    id: 'logo',
+    code: '02',
+    label: 'LOGO DESIGN',
+    shortDesc: 'Logomarks, monograms & symbols',
+  },
+  {
+    id: 'brand-guideline',
+    code: '03',
+    label: 'BRAND STYLE GUIDE',
+    shortDesc: 'Identity rules, color & typography systems',
+  },
+  {
+    id: 'social-media',
+    code: '04',
+    label: 'SOCIAL MEDIA DESIGN',
+    shortDesc: 'Campaign visuals & social post layouts',
+  },
+];
+
+export const PROJECTS: ProjectItem[] = [
+  {
+    "title": "Professional Thumbnail Design Portfolio | Photoshop",
+    "category": "social-media",
+    "categoryLabel": "SOCIAL MEDIA DESIGN",
+    "thumbnail": "/images/uploads/all-file-1793844745812-81q7d.jpg",
+    "fullImage": "/images/uploads/all-file-1793844745812-81q7d.jpg",
+    "coverCrop": {
+      "zoom": 1,
+      "offsetX": 0,
+      "offsetY": 0
+    },
+    "sheets": [
+      {
+        "label": "ALL-FILE",
+        "image": "/images/uploads/all-file-1793844745812-81q7d.jpg"
+      },
+      {
+        "label": "File-02",
+        "image": "/images/uploads/file-02-1793844757926-elxuy.jpg"
+      },
+      {
+        "label": "File-05",
+        "image": "/images/uploads/file-05-1793844768442-tw5kq.jpg"
+      },
+      {
+        "label": "File-03",
+        "image": "/images/uploads/file-03-1793844776454-m1ccp.jpg"
+      },
+      {
+        "label": "File-04",
+        "image": "/images/uploads/file-04-1793844803646-j3hmd.jpg"
+      },
+      {
+        "label": "File-01",
+        "image": "/images/uploads/file-01-1793844812927-h0j5g.jpg"
+      }
+    ],
+    "contentBlocks": [
+      {
+        "id": "block-img-1793844745793-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/all-file-1793844745812-81q7d.jpg",
+        "caption": "ALL-FILE",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793844757910-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/file-02-1793844757926-elxuy.jpg",
+        "caption": "File-02",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793844768426-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/file-05-1793844768442-tw5kq.jpg",
+        "caption": "File-05",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793844776434-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/file-03-1793844776454-m1ccp.jpg",
+        "caption": "File-03",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793844803628-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/file-04-1793844803646-j3hmd.jpg",
+        "caption": "File-04",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793844812908-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/file-01-1793844812927-h0j5g.jpg",
+        "caption": "File-01",
+        "layout": "full"
+      }
+    ],
+    "canvasStyle": {
+      "backgroundColor": "#0b0a10",
+      "blockSpacing": 0,
+      "maxWidth": "wide"
+    },
+    "description": "This project showcases a collection of modern YouTube thumbnail designs created in Adobe Photoshop.\n\nEach thumbnail was carefully designed with a strong focus on visual hierarchy, typography, color harmony, composition, and viewer engagement. My goal was to create bold, clean, and eye-catching visuals that effectively communicate the content while increasing click-through potential.\n\nThe collection covers different content categories, including Graphic Design, Adobe Stock, Photoshop Tutorials, ChatGPT, and Educational Content. Every design reflects my creative approach to balancing aesthetics with functionality, ensuring that each thumbnail is visually appealing and easy to understand at first glance.\n\nThese designs demonstrate my skills in photo manipulation, typography, lighting, color grading, and layout composition to create professional-quality thumbnails suitable for modern digital content.\n\nThank you for taking the time to view my work. I appreciate your feedback and welcome col",
+    "tags": [
+      "Brand Identity",
+      "Graphic Design",
+      "Youtube Thumbnail"
+    ],
+    "featured": false,
+    "tools": [
+      "Adobe Photoshop"
+    ],
+    "deliverables": [
+      "Brand Identity Deliverable"
+    ],
+    "savedAt": "2026-11-05T02:18:57.420Z",
+    "editorialSpan": "standard",
+    "aspectRatio": "4/3",
+    "status": "published",
+    "visible": true,
+    "updatedAt": "2026-11-05T02:18:57.420Z",
+    "views": 1,
+    "likes": 0,
+    "appreciations": 0,
+    "id": "project-1793845137420",
+    "displayOrder": 1
+  },
+  {
+    "title": "Winter Wedding Campaign | 3D Social Media Design",
+    "category": "social-media",
+    "categoryLabel": "SOCIAL MEDIA DESIGN",
+    "thumbnail": "/images/uploads/------------all-1793828007775.jpg",
+    "fullImage": "/images/uploads/------------all-1793828007775.jpg",
+    "coverCrop": {
+      "zoom": 1,
+      "offsetX": 0,
+      "offsetY": 0
+    },
+    "sheets": [
+      {
+        "label": "বিয়ের-সিজন-all",
+        "image": "/images/uploads/------------all-1793828007775.jpg"
+      },
+      {
+        "label": "বিয়ের-সিজন-1",
+        "image": "/images/uploads/------------1-1793828015115.jpg"
+      },
+      {
+        "label": "বিয়ের-সিজন-2",
+        "image": "/images/uploads/------------2-1793828029025.jpg"
+      },
+      {
+        "label": "বিয়ের-সিজন-3",
+        "image": "/images/uploads/------------3-1793828035515.jpg"
+      },
+      {
+        "label": "বিয়ের-সিজন-4",
+        "image": "/images/uploads/------------4-1793828042369.jpg"
+      },
+      {
+        "label": "বিয়ের-সিজন-5",
+        "image": "/images/uploads/------------5-1793828049046.jpg"
+      },
+      {
+        "label": "বিয়ের-সিজন-6",
+        "image": "/images/uploads/------------6-1793828055547.jpg"
+      },
+      {
+        "label": "বিয়ের-সিজন-7",
+        "image": "/images/uploads/------------7-1793828063451.jpg"
+      },
+      {
+        "label": "বিয়ের-সিজন-8",
+        "image": "/images/uploads/------------8-1793828068949.jpg"
+      }
+    ],
+    "contentBlocks": [
+      {
+        "id": "block-img-1793828007787-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/------------all-1793828007775.jpg",
+        "caption": "বিয়ের-সিজন-all",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793828015120-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/------------1-1793828015115.jpg",
+        "caption": "বিয়ের-সিজন-1",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793828029033-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/------------2-1793828029025.jpg",
+        "caption": "বিয়ের-সিজন-2",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793828035522-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/------------3-1793828035515.jpg",
+        "caption": "বিয়ের-সিজন-3",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793828042377-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/------------4-1793828042369.jpg",
+        "caption": "বিয়ের-সিজন-4",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793828049054-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/------------5-1793828049046.jpg",
+        "caption": "বিয়ের-সিজন-5",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793828055560-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/------------6-1793828055547.jpg",
+        "caption": "বিয়ের-সিজন-6",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793828063460-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/------------7-1793828063451.jpg",
+        "caption": "বিয়ের-সিজন-7",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793828068955-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/------------8-1793828068949.jpg",
+        "caption": "বিয়ের-সিজন-8",
+        "layout": "full"
+      }
+    ],
+    "canvasStyle": {
+      "backgroundColor": "#0b0a10",
+      "blockSpacing": 0,
+      "maxWidth": "wide"
+    },
+    "description": "Explore Winter Wedding Campaign, a creative Bengali social media campaign featuring humorous wedding-season moments, expressive 3D cartoon characters, creative visual storytelling, and engaging social media designs. Designed to bring humor, creativity, and personality to winter wedding celebrations in Bangladesh.",
+    "tags": [
+      "Brand Identity",
+      "Graphic Design",
+      "Social Media Design",
+      "3D Illustration",
+      "3D Character Design"
+    ],
+    "featured": false,
+    "editorialSpan": "standard",
+    "aspectRatio": "4/3",
+    "tools": [
+      "Adobe Photoshop"
+    ],
+    "deliverables": [
+      "Brand Identity Deliverable"
+    ],
+    "status": "published",
+    "visible": true,
+    "views": 1,
+    "likes": 1,
+    "appreciations": 1,
+    "id": "project-1793828317901",
+    "displayOrder": 2,
+    "savedAt": "2026-11-04T22:01:38.461Z",
+    "updatedAt": "2026-11-04T22:01:38.461Z"
+  },
+  {
+    "title": "Modern Corporate Business Flyer Design | Professional",
+    "category": "social-media",
+    "categoryLabel": "SOCIAL MEDIA DESIGN",
+    "thumbnail": "/images/uploads/flyer-mockup-1793844331245-gensk.jpg",
+    "fullImage": "/images/uploads/flyer-mockup-1793844331245-gensk.jpg",
+    "coverCrop": {
+      "zoom": 1,
+      "offsetX": 0,
+      "offsetY": 0
+    },
+    "sheets": [
+      {
+        "label": "Flyer-Mockup",
+        "image": "/images/uploads/flyer-mockup-1793844331245-gensk.jpg"
+      },
+      {
+        "label": "Flyer-01-02",
+        "image": "/images/uploads/flyer-01-02-1793844344712-45mgz.jpg"
+      },
+      {
+        "label": "Flyer-01",
+        "image": "/images/uploads/flyer-01-1793844356262-amp64.jpg"
+      },
+      {
+        "label": "Free-Poster-on-a-Concrete-Stairs-Mockup",
+        "image": "/images/uploads/free-poster-on-a-concrete-stairs-mockup-1793844368923-mpsdv.jpg"
+      },
+      {
+        "label": "Flyer-02",
+        "image": "/images/uploads/flyer-02-1793844395134-yb68b.jpg"
+      },
+      {
+        "label": "Free-Poster-on-a-Concrete-Stairs-Mockup2",
+        "image": "/images/uploads/free-poster-on-a-concrete-stairs-mockup2-1793844414569-hv1uy.jpg"
+      }
+    ],
+    "contentBlocks": [
+      {
+        "id": "block-img-1793844331233-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/flyer-mockup-1793844331245-gensk.jpg",
+        "caption": "Flyer-Mockup",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793844344700-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/flyer-01-02-1793844344712-45mgz.jpg",
+        "caption": "Flyer-01-02",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793844356251-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/flyer-01-1793844356262-amp64.jpg",
+        "caption": "Flyer-01",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793844368894-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/free-poster-on-a-concrete-stairs-mockup-1793844368923-mpsdv.jpg",
+        "caption": "Free-Poster-on-a-Concrete-Stairs-Mockup",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793844395120-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/flyer-02-1793844395134-yb68b.jpg",
+        "caption": "Flyer-02",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793844414541-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/free-poster-on-a-concrete-stairs-mockup2-1793844414569-hv1uy.jpg",
+        "caption": "Free-Poster-on-a-Concrete-Stairs-Mockup2",
+        "layout": "full"
+      }
+    ],
+    "canvasStyle": {
+      "backgroundColor": "#0b0a10",
+      "blockSpacing": 0,
+      "maxWidth": "wide"
+    },
+    "description": "A modern corporate flyer design featuring two professional color variations (Red & Yellow). Designed with a clean layout, bold typography, and creative geometric elements, this A4 flyer is perfect for businesses, agencies, startups, and marketing promotions. Fully editable and print-ready, it demonstrates a strong focus on branding, visual hierarchy, and professional print design.",
+    "tags": [
+      "Brand Identity",
+      "Graphic Design",
+      "business flyer",
+      "corporate flyer",
+      "Flyer Design",
+      "professional flyer"
+    ],
+    "featured": false,
+    "tools": [
+      "Adobe Illustrator"
+    ],
+    "deliverables": [
+      "Brand Identity Deliverable"
+    ],
+    "savedAt": "2026-11-05T02:10:21.080Z",
+    "editorialSpan": "standard",
+    "aspectRatio": "4/3",
+    "status": "published",
+    "visible": true,
+    "updatedAt": "2026-11-05T02:10:21.080Z",
+    "views": 1,
+    "likes": 0,
+    "appreciations": 0,
+    "id": "project-1793844621080",
+    "displayOrder": 3
+  },
+  {
+    "title": "Tom & Jerry Inspired Streetwear Design",
+    "category": "social-media",
+    "categoryLabel": "SOCIAL MEDIA DESIGN",
+    "thumbnail": "/images/uploads/untitled-1-1793843700009-h5uwx.jpg",
+    "fullImage": "/images/uploads/f9059fdb-7711-44f2-894b-55d4a4d012e4-1793843511826-pa9d9.png",
+    "coverCrop": {
+      "zoom": 1,
+      "offsetX": 0,
+      "offsetY": 0
+    },
+    "sheets": [
+      {
+        "label": "f9059fdb-7711-44f2-894b-55d4a4d012e4",
+        "image": "/images/uploads/f9059fdb-7711-44f2-894b-55d4a4d012e4-1793843511826-pa9d9.png"
+      },
+      {
+        "label": "Untitled-1",
+        "image": "/images/uploads/untitled-1-1793843700009-h5uwx.jpg"
+      },
+      {
+        "label": "Free_T-Shirt_Mannequin_Mockup_1",
+        "image": "/images/uploads/free_t-shirt_mannequin_mockup_1-1793843546102-9fyob.jpg"
+      },
+      {
+        "label": "CAT-&-MOUSE-FILE-01",
+        "image": "/images/uploads/cat---mouse-file-01-1793843554441-q235h.jpg"
+      },
+      {
+        "label": "Hanging-T-shirt-Mockup",
+        "image": "/images/uploads/hanging-t-shirt-mockup-1793843579273-7dt4h.jpg"
+      },
+      {
+        "label": "Free_Sweatshirt_Mockup_1",
+        "image": "/images/uploads/free_sweatshirt_mockup_1-1793843561681-5210m.jpg"
+      },
+      {
+        "label": "Free_Baseball_Cap_Mockup_3",
+        "image": "/images/uploads/free_baseball_cap_mockup_3-1793843570821-o4hbq.jpg"
+      },
+      {
+        "label": "58ce6cc8-e138-410a-a384-1edbfe4f1ef3",
+        "image": "/images/uploads/58ce6cc8-e138-410a-a384-1edbfe4f1ef3-1793843765328-ys5gc.png"
+      }
+    ],
+    "contentBlocks": [
+      {
+        "id": "block-img-1793843511816-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/f9059fdb-7711-44f2-894b-55d4a4d012e4-1793843511826-pa9d9.png",
+        "caption": "f9059fdb-7711-44f2-894b-55d4a4d012e4",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793843700002-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/untitled-1-1793843700009-h5uwx.jpg",
+        "caption": "Untitled-1",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793843546097-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/free_t-shirt_mannequin_mockup_1-1793843546102-9fyob.jpg",
+        "caption": "Free_T-Shirt_Mannequin_Mockup_1",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793843554432-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/cat---mouse-file-01-1793843554441-q235h.jpg",
+        "caption": "CAT-&-MOUSE-FILE-01",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793843579268-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/hanging-t-shirt-mockup-1793843579273-7dt4h.jpg",
+        "caption": "Hanging-T-shirt-Mockup",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793843561671-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/free_sweatshirt_mockup_1-1793843561681-5210m.jpg",
+        "caption": "Free_Sweatshirt_Mockup_1",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793843570814-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/free_baseball_cap_mockup_3-1793843570821-o4hbq.jpg",
+        "caption": "Free_Baseball_Cap_Mockup_3",
+        "layout": "full"
+      },
+      {
+        "id": "block-img-1793843765323-0",
+        "type": "image",
+        "imageUrl": "/images/uploads/58ce6cc8-e138-410a-a384-1edbfe4f1ef3-1793843765328-ys5gc.png",
+        "caption": "58ce6cc8-e138-410a-a384-1edbfe4f1ef3",
+        "layout": "full"
+      }
+    ],
+    "canvasStyle": {
+      "backgroundColor": "#0b0a10",
+      "blockSpacing": 0,
+      "maxWidth": "wide"
+    },
+    "description": "This project is a fun and energetic t-shirt design inspired by the classic chase dynamic between a cat and a mouse.\n\nThe concept focuses on motion, humor, and playful storytelling using bold typography and cartoon-style illustration. The phrase “Chase Mode: Always On” represents constant energy, competitiveness, and fun lifestyle.\n\nDesign Highlights:\n• Bold modern typography with dynamic angle\n• Cartoon characters representing movement and energy\n• Strong contrast using black, white, and yellow\n• Suitable for streetwear and casual fashion brands\n\nThis design is created with scalability in mind, ensuring it works across apparel, print, and digital platforms.",
+    "tags": [
+      "Brand Identity",
+      "Graphic Design",
+      "Tshirt Design",
+      "t-shirt",
+      "Fashion",
+      "typography"
+    ],
+    "featured": false,
+    "tools": [
+      "Adobe Illustrator"
+    ],
+    "deliverables": [
+      "Brand Identity Deliverable"
+    ],
+    "savedAt": "2026-11-05T01:59:58.937Z",
+    "editorialSpan": "standard",
+    "aspectRatio": "4/3",
+    "status": "published",
+    "visible": true,
+    "updatedAt": "2026-11-05T01:59:58.937Z",
+    "views": 1,
+    "likes": 0,
+    "appreciations": 0,
+    "id": "project-1793843998938",
+    "displayOrder": 4
+  },
+  {
+    "id": "logo-01",
+    "title": "Dual-Ring Geometric Monogram",
+    "category": "logo",
+    "categoryLabel": "Logo Design",
+    "thumbnail": "/images/portfolio/logos/logo-01.svg",
+    "fullImage": "/images/portfolio/logos/logo-01.svg",
+    "featuredCover": "/images/featured/featured-01.svg",
+    "description": "Interlocking circular geometry constructed on a precision grid with balanced positive and negative space.",
+    "featured": true,
+    "displayOrder": 5,
+    "editorialSpan": "feature",
+    "aspectRatio": "1/1",
+    "tools": [
+      "Adobe Illustrator"
+    ],
+    "deliverables": [
+      "Primary Mark",
+      "Construction Grid",
+      "Monochrome Lockup"
+    ],
+    "visible": true,
+    "views": 1,
+    "likes": 0,
+    "appreciations": 0,
+    "status": "published"
+  },
+  {
+    "id": "brand-guideline-01",
+    "title": "Editorial Identity System & Brand Book",
+    "category": "brand-guideline",
+    "categoryLabel": "Brand Style Guide",
+    "thumbnail": "/images/portfolio/brand-guidelines/brand-guideline-01.svg",
+    "fullImage": "/images/portfolio/brand-guidelines/brand-guideline-01.svg",
+    "featuredCover": "/images/featured/featured-02.svg",
+    "sheets": [
+      {
+        "label": "01 / Cover & Mark",
+        "image": "/images/portfolio/brand-guidelines/brand-guideline-01.svg"
+      },
+      {
+        "label": "02 / Color Palette System",
+        "image": "/images/portfolio/brand-guidelines/brand-guideline-01-page-2.svg"
+      },
+      {
+        "label": "03 / Typography Hierarchy",
+        "image": "/images/portfolio/brand-guidelines/brand-guideline-01-page-3.svg"
+      }
+    ],
+    "description": "Complete brand style guide covering mark architecture, color specifications, and sans-serif typographic hierarchy.",
+    "featured": true,
+    "displayOrder": 6,
+    "editorialSpan": "wide",
+    "aspectRatio": "4/3",
+    "tools": [
+      "Adobe InDesign",
+      "Adobe Illustrator"
+    ],
+    "deliverables": [
+      "Style Guide",
+      "Color System",
+      "Typography Scale"
+    ],
+    "visible": true,
+    "views": 0,
+    "likes": 0,
+    "appreciations": 0,
+    "status": "published"
+  },
+  {
+    "id": "social-01",
+    "title": "Product Launch Campaign Visual",
+    "category": "social-media",
+    "categoryLabel": "Social Media Design",
+    "thumbnail": "/images/portfolio/social-media/social-01.svg",
+    "fullImage": "/images/portfolio/social-media/social-01.svg",
+    "featuredCover": "/images/featured/featured-03.svg",
+    "description": "Social media launch graphic engineered for strong contrast, clear focal hierarchy, and bold call-to-action placement.",
+    "featured": true,
+    "displayOrder": 7,
+    "editorialSpan": "tall",
+    "aspectRatio": "4/5",
+    "tools": [
+      "Adobe Photoshop",
+      "Adobe Illustrator"
+    ],
+    "deliverables": [
+      "Feed Post (4:5)",
+      "Launch Template"
+    ],
+    "visible": true,
+    "views": 0,
+    "likes": 0,
+    "appreciations": 0,
+    "status": "published"
+  },
+  {
+    "id": "logo-02",
+    "title": "Rotated Diamond Emblem Mark",
+    "category": "logo",
+    "categoryLabel": "Logo Design",
+    "thumbnail": "/images/portfolio/logos/logo-02.svg",
+    "fullImage": "/images/portfolio/logos/logo-02.svg",
+    "description": "Dark-mode logo identity built on a 45-degree rotated lattice with a high-contrast negative core.",
+    "featured": false,
+    "displayOrder": 8,
+    "editorialSpan": "standard",
+    "aspectRatio": "1/1",
+    "tools": [
+      "Adobe Illustrator"
+    ],
+    "deliverables": [
+      "Iconic Logomark",
+      "Dark/Light Variations"
+    ],
+    "visible": true,
+    "views": 0,
+    "likes": 0,
+    "appreciations": 0,
+    "status": "published"
+  },
+  {
+    "id": "brand-guideline-02",
+    "title": "Logo Clear-Space & Usage Rules",
+    "category": "brand-guideline",
+    "categoryLabel": "Brand Style Guide",
+    "thumbnail": "/images/portfolio/brand-guidelines/brand-guideline-02.svg",
+    "fullImage": "/images/portfolio/brand-guidelines/brand-guideline-02.svg",
+    "featuredCover": "/images/featured/featured-05.svg",
+    "description": "Brand guideline sheet defining minimum clear-space zones, positive/negative usage, and background pairings.",
+    "featured": true,
+    "displayOrder": 9,
+    "editorialSpan": "wide",
+    "aspectRatio": "4/3",
+    "tools": [
+      "Adobe InDesign",
+      "Adobe Illustrator"
+    ],
+    "deliverables": [
+      "Logo Usage Standards",
+      "Clear-Space Grid"
+    ],
+    "visible": true,
+    "views": 0,
+    "likes": 0,
+    "appreciations": 0,
+    "status": "published"
+  },
+  {
+    "id": "social-02",
+    "title": "Editorial Statement Social Graphic",
+    "category": "social-media",
+    "categoryLabel": "Social Media Design",
+    "thumbnail": "/images/portfolio/social-media/social-02.svg",
+    "fullImage": "/images/portfolio/social-media/social-02.svg",
+    "description": "Dark-themed social media graphic emphasizing oversized typographic structure and clean brand attribution.",
+    "featured": false,
+    "displayOrder": 10,
+    "editorialSpan": "tall",
+    "aspectRatio": "4/5",
+    "tools": [
+      "Adobe Photoshop",
+      "Adobe Illustrator"
+    ],
+    "deliverables": [
+      "Editorial Post",
+      "Social Feed Template"
+    ],
+    "visible": true,
+    "views": 0,
+    "likes": 0,
+    "appreciations": 0,
+    "status": "published"
+  },
+  {
+    "id": "logo-03",
+    "title": "Concentric Arch Horizon Symbol",
+    "category": "logo",
+    "categoryLabel": "Logo Design",
+    "thumbnail": "/images/portfolio/logos/logo-03.svg",
+    "fullImage": "/images/portfolio/logos/logo-03.svg",
+    "featuredCover": "/images/featured/featured-04.svg",
+    "description": "Architectural logo mark combining concentric radial arches and a grounded horizon baseline.",
+    "featured": true,
+    "displayOrder": 11,
+    "editorialSpan": "standard",
+    "aspectRatio": "1/1",
+    "tools": [
+      "Adobe Illustrator"
+    ],
+    "deliverables": [
+      "Vector Symbol",
+      "Responsive Badge"
+    ],
+    "visible": true,
+    "views": 0,
+    "likes": 0,
+    "appreciations": 0,
+    "status": "published"
+  },
+  {
+    "id": "social-03",
+    "title": "Diagonal Split Event Announcement",
+    "category": "social-media",
+    "categoryLabel": "Social Media Design",
+    "thumbnail": "/images/portfolio/social-media/social-03.svg",
+    "fullImage": "/images/portfolio/social-media/social-03.svg",
+    "description": "Event announcement social post featuring oversized date numerals and dynamic diagonal geometry.",
+    "featured": false,
+    "displayOrder": 12,
+    "editorialSpan": "tall",
+    "aspectRatio": "4/5",
+    "tools": [
+      "Adobe Photoshop",
+      "Adobe Illustrator"
+    ],
+    "deliverables": [
+      "Event Post",
+      "Story Layout"
+    ],
+    "visible": true,
+    "views": 1,
+    "likes": 0,
+    "appreciations": 0,
+    "status": "published"
+  },
+  {
+    "id": "brand-guideline-03",
+    "title": "Chromatic Ratio Specification",
+    "category": "brand-guideline",
+    "categoryLabel": "Brand Style Guide",
+    "thumbnail": "/images/portfolio/brand-guidelines/brand-guideline-03.svg",
+    "fullImage": "/images/portfolio/brand-guidelines/brand-guideline-03.svg",
+    "description": "Brand style guide spread detailing primary, secondary, neutral, and accent swatch proportions.",
+    "featured": false,
+    "displayOrder": 13,
+    "editorialSpan": "wide",
+    "aspectRatio": "4/3",
+    "tools": [
+      "Adobe InDesign"
+    ],
+    "deliverables": [
+      "Color Swatch System",
+      "Usage Ratios"
+    ],
+    "visible": true,
+    "views": 0,
+    "likes": 0,
+    "appreciations": 0,
+    "status": "published"
+  },
+  {
+    "id": "logo-04",
+    "title": "Hexagonal Prism Identity Mark",
+    "category": "logo",
+    "categoryLabel": "Logo Design",
+    "thumbnail": "/images/portfolio/logos/logo-04.svg",
+    "fullImage": "/images/portfolio/logos/logo-04.svg",
+    "description": "Polygonal logomark pairing a precision outer hexagon with a contrasting central apex triangle.",
+    "featured": false,
+    "displayOrder": 14,
+    "editorialSpan": "standard",
+    "aspectRatio": "1/1",
+    "tools": [
+      "Adobe Illustrator"
+    ],
+    "deliverables": [
+      "Primary Logomark",
+      "Color Variants"
+    ],
+    "visible": true,
+    "views": 0,
+    "likes": 0,
+    "appreciations": 0,
+    "status": "published"
+  },
+  {
+    "id": "social-04",
+    "title": "Arch Frame Seasonal Offer Visual",
+    "category": "social-media",
+    "categoryLabel": "Social Media Design",
+    "thumbnail": "/images/portfolio/social-media/social-04.svg",
+    "fullImage": "/images/portfolio/social-media/social-04.svg",
+    "description": "Promotional post layout built around an architectural arch frame and balanced geometric focal elements.",
+    "featured": false,
+    "displayOrder": 15,
+    "editorialSpan": "tall",
+    "aspectRatio": "4/5",
+    "tools": [
+      "Adobe Photoshop",
+      "Adobe Illustrator"
+    ],
+    "deliverables": [
+      "Promotional Post",
+      "Campaign Visual"
+    ],
+    "visible": true,
+    "views": 0,
+    "likes": 0,
+    "appreciations": 0,
+    "status": "published"
+  },
+  {
+    "id": "logo-05",
+    "title": "Modular Nine-Point Matrix Emblem",
+    "category": "logo",
+    "categoryLabel": "Logo Design",
+    "thumbnail": "/images/portfolio/logos/logo-05.svg",
+    "fullImage": "/images/portfolio/logos/logo-05.svg",
+    "description": "Grid-based identity symbol using a rhythmic 3x3 circular matrix anchored by a central diamond node.",
+    "featured": false,
+    "displayOrder": 16,
+    "editorialSpan": "standard",
+    "aspectRatio": "1/1",
+    "tools": [
+      "Adobe Illustrator"
+    ],
+    "deliverables": [
+      "Modular Emblem",
+      "App Icon Scaling"
+    ],
+    "visible": true,
+    "views": 0,
+    "likes": 0,
+    "appreciations": 0,
+    "status": "published"
+  },
+  {
+    "id": "brand-guideline-04",
+    "title": "12-Column Editorial Layout Grid",
+    "category": "brand-guideline",
+    "categoryLabel": "Brand Style Guide",
+    "thumbnail": "/images/portfolio/brand-guidelines/brand-guideline-04.svg",
+    "fullImage": "/images/portfolio/brand-guidelines/brand-guideline-04.svg",
+    "description": "Brand style guide page establishing 12-column grid margins, headline placement zones, and modular blocks.",
+    "featured": false,
+    "displayOrder": 17,
+    "editorialSpan": "wide",
+    "aspectRatio": "4/3",
+    "tools": [
+      "Adobe InDesign"
+    ],
+    "deliverables": [
+      "Editorial Grid Rules",
+      "Layout Templates"
+    ],
+    "visible": true,
+    "views": 0,
+    "likes": 0,
+    "appreciations": 0,
+    "status": "published"
+  },
+  {
+    "id": "social-05",
+    "title": "Modular Quadrant Brand Series",
+    "category": "social-media",
+    "categoryLabel": "Social Media Design",
+    "thumbnail": "/images/portfolio/social-media/social-05.svg",
+    "fullImage": "/images/portfolio/social-media/social-05.svg",
+    "description": "Social media series template structured around a four-quadrant geometric grid for cohesive storytelling.",
+    "featured": false,
+    "displayOrder": 18,
+    "editorialSpan": "tall",
+    "aspectRatio": "4/5",
+    "tools": [
+      "Adobe Photoshop",
+      "Adobe Illustrator"
+    ],
+    "deliverables": [
+      "Carousel Grid",
+      "Social Template"
+    ],
+    "visible": true,
+    "views": 0,
+    "likes": 0,
+    "appreciations": 0,
+    "status": "published"
+  },
+  {
+    "id": "logo-06",
+    "title": "Botanical Vesica & Axis Mark",
+    "category": "logo",
+    "categoryLabel": "Logo Design",
+    "thumbnail": "/images/portfolio/logos/logo-06.svg",
+    "fullImage": "/images/portfolio/logos/logo-06.svg",
+    "description": "Organic-geometric logo mark formed from intersecting arcs, a vertical spine, and an orbital accent node.",
+    "featured": false,
+    "displayOrder": 19,
+    "editorialSpan": "standard",
+    "aspectRatio": "1/1",
+    "tools": [
+      "Adobe Illustrator"
+    ],
+    "deliverables": [
+      "Primary Logo Mark",
+      "Lockup Variations"
+    ],
+    "visible": true,
+    "views": 0,
+    "likes": 0,
+    "appreciations": 0,
+    "status": "published"
+  },
+  {
+    "id": "social-06",
+    "title": "Concentric Campaign Key Visual",
+    "category": "social-media",
+    "categoryLabel": "Social Media Design",
+    "thumbnail": "/images/portfolio/social-media/social-06.svg",
+    "fullImage": "/images/portfolio/social-media/social-06.svg",
+    "description": "Campaign post design utilizing rhythmic concentric rings to draw immediate focus toward the central message.",
+    "featured": false,
+    "displayOrder": 20,
+    "editorialSpan": "tall",
+    "aspectRatio": "4/5",
+    "tools": [
+      "Adobe Photoshop",
+      "Adobe Illustrator"
+    ],
+    "deliverables": [
+      "Campaign Key Visual",
+      "Feed & Story Formats"
+    ],
+    "visible": true,
+    "views": 0,
+    "likes": 0,
+    "appreciations": 0,
+    "status": "published"
+  }
+];
+
+export const ORDERED_PROJECTS = [...PROJECTS].sort(
+  (a, b) => a.displayOrder - b.displayOrder
+);
+
+export const FEATURED_PROJECTS = ORDERED_PROJECTS.filter((p) => p.featured);

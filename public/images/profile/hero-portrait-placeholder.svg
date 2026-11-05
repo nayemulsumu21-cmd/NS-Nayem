@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1500" viewBox="0 0 1200 1500">
+  <defs>
+    <radialGradient id="studioGlow" cx="50%" cy="38%" r="60%">
+      <stop offset="0%" stop-color="#E02927" stop-opacity="0.28"/>
+      <stop offset="55%" stop-color="#1A1216" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#08080B" stop-opacity="0.9"/>
+    </radialGradient>
+    <linearGradient id="crimsonRim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6A4D" stop-opacity="0.75"/>
+      <stop offset="50%" stop-color="#C8141E" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#C9A45C" stop-opacity="0.6"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1500" fill="url(#studioGlow)"/>
+  <path d="M 310 1240 L 310 560 A 290 290 0 0 1 890 560 L 890 1240 Z" fill="#121015" stroke="url(#crimsonRim)" stroke-width="2.5"/>
+  <circle cx="600" cy="490" r="115" fill="#1B161D" stroke="#FF6A4D" stroke-opacity="0.6" stroke-width="2.5"/>
+  <path d="M 355 1140 C 355 860 455 720 600 720 C 745 720 845 860 845 1140" fill="#1B161D" stroke="#FF6A4D" stroke-opacity="0.5" stroke-width="2.5"/>
+  <text x="600" y="510" font-family="Arial, Helvetica, sans-serif" font-size="56" font-weight="700" fill="#FF6A4D" text-anchor="middle" letter-spacing="8">NI</text>
+  <text x="600" y="905" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#F4EFE6" text-anchor="middle" letter-spacing="5">NAYEMUL ISLAM PORTRAIT</text>
+</svg>
