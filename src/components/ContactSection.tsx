@@ -427,22 +427,34 @@ export const ContactSection: React.FC = () => {
               noValidate
               className="rounded-3xl border border-cream/15 bg-charcoal/90 p-6 shadow-studio backdrop-blur-xl sm:p-8"
             >
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-editorial text-[#f1b39c]">
                   <Sparkles className="h-4 w-4 text-[#7ca6e8]" />
                   <span>PROJECT INQUIRY</span>
                 </div>
-                {isOwnerMode && (
-                  <button
-                    type="button"
-                    onClick={() => openCMS('contact')}
-                    className="inline-flex items-center gap-1 rounded-lg border border-cream/15 bg-obsidian px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#7ca6e8] transition hover:border-[#7ca6e8]"
-                    title="Configure Gmail Delivery"
-                  >
-                    <Settings className="h-3 w-3" />
-                    <span>Gmail Settings</span>
-                  </button>
-                )}
+
+                <div className="flex items-center gap-2">
+                  {/* Verified Gmail Status Indicator */}
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-950/70 px-3 py-1 font-display text-[10px] font-bold uppercase tracking-wider text-emerald-300 shadow-[0_0_14px_rgba(52,211,153,0.2)]">
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                    </span>
+                    <span>Gmail Verified</span>
+                  </span>
+
+                  {isOwnerMode && (
+                    <button
+                      type="button"
+                      onClick={() => openCMS('contact')}
+                      className="inline-flex items-center gap-1 rounded-lg border border-cream/15 bg-obsidian px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#7ca6e8] transition hover:border-[#7ca6e8]"
+                      title="Configure Gmail Delivery"
+                    >
+                      <Settings className="h-3 w-3" />
+                      <span>Gmail Settings</span>
+                    </button>
+                  )}
+                </div>
               </div>
 
               <h3 className="mt-2 font-display text-xl font-extrabold uppercase text-cream">

@@ -5,6 +5,22 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/__cms/email/status",
+      "destination": "/api/email-status"
+    },
+    {
+      "source": "/__cms/email/inquiries",
+      "destination": "/api/email-inquiries"
+    },
+    {
+      "source": "/__cms/email/config",
+      "destination": "/api/email-config"
+    },
+    {
+      "source": "/__cms/email/test",
+      "destination": "/api/email-test"
+    },
+    {
       "source": "/__cms/email/inquiry",
       "destination": "/api/inquiry"
     },
