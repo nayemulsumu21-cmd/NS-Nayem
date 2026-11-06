@@ -61,11 +61,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const recipientGmail = (
-      process.env.RECIPIENT_GMAIL ||
-      process.env.GMAIL_USER ||
-      'nayemulsumu21@gmail.com'
-    ).trim();
+    const recipientGmail = 'nayemulsumu21@gmail.com';
 
     const rawAppPassword = (
       process.env.SMTP_APP_PASSWORD ||
@@ -172,6 +168,8 @@ export default async function handler(req, res) {
           body: JSON.stringify({
             _subject: emailSubject,
             _replyto: clientEmail,
+            _autoresponse: 'false',
+            _template: 'table',
             Name: clientName,
             Email: clientEmail,
             Service: service,

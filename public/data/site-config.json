@@ -135,37 +135,37 @@
   "contact": {
     "heading": "HAVE A PROJECT IN MIND?",
     "supportingText": "Let's work together to create something meaningful.",
-    "emailPlaceholder": "your.email@example.com",
+    "emailPlaceholder": "nayemulsumu21@gmail.com",
     "socialLinks": [
       {
         "id": "behance",
         "label": "Behance",
-        "handlePlaceholder": "behance.net/nayemul-islam",
-        "url": "#behance"
+        "handlePlaceholder": "behance.net/nayemulislam10",
+        "url": "https://www.behance.net/nayemulislam10"
       },
       {
         "id": "instagram",
         "label": "Instagram",
-        "handlePlaceholder": "@nayemul.islam",
-        "url": "#instagram"
+        "handlePlaceholder": "@nayemul321",
+        "url": "https://www.instagram.com/nayemul321/?hl=en"
       },
       {
         "id": "facebook",
         "label": "Facebook",
-        "handlePlaceholder": "facebook.com/nayemul.islam",
-        "url": "#facebook"
+        "handlePlaceholder": "facebook.com/mdnaemul66",
+        "url": "https://www.facebook.com/mdnaemul66"
       },
       {
         "id": "linkedin",
         "label": "LinkedIn",
-        "handlePlaceholder": "linkedin.com/in/nayemul-islam",
-        "url": "#linkedin"
+        "handlePlaceholder": "linkedin.com/in/nayemul-islam-a288923b3",
+        "url": "https://www.linkedin.com/in/nayemul-islam-a288923b3/"
       },
       {
         "id": "fiverr",
         "label": "Fiverr",
-        "handlePlaceholder": "fiverr.com/nayemul_islam",
-        "url": "#fiverr"
+        "handlePlaceholder": "fiverr.com/nayemulgfx",
+        "url": "https://www.fiverr.com/nayemulgfx"
       }
     ]
   }

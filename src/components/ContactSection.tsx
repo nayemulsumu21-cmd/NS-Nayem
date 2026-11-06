@@ -166,6 +166,8 @@ export const ContactSection: React.FC = () => {
               body: JSON.stringify({
                 _subject: `New Project Inquiry — ${clientName.trim()}`,
                 _replyto: clientEmail.trim(),
+                _autoresponse: 'false',
+                _template: 'table',
                 Name: clientName.trim(),
                 Email: clientEmail.trim(),
                 Service: selectedService,
@@ -643,7 +645,7 @@ export const ContactSection: React.FC = () => {
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
                       <div className="space-y-1">
                         <p className="font-display text-xs font-bold uppercase tracking-wider text-emerald-300">
-                          Inquiry Delivered to Gmail
+                          Inquiry Delivered to nayemulsumu21@gmail.com
                         </p>
                         <p className="leading-relaxed text-cream/90">
                           {statusMessage}
