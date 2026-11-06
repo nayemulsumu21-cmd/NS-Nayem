@@ -44,6 +44,91 @@ const EMAIL_CONFIG_PATH = path.join(SECRETS_DIR, 'email-config.json');
 const INQUIRIES_LOG_PATH = path.join(SECRETS_DIR, 'inquiries-log.json');
 const AUTH_CONFIG_PATH = path.join(SECRETS_DIR, 'auth-config.json');
 const SESSIONS_PATH = path.join(SECRETS_DIR, 'sessions.json');
+const ANALYTICS_FILE_DEV = path.join(SECRETS_DIR, 'analytics.json');
+const PUBLIC_VIEWS_FILE_DEV = path.resolve(process.cwd(), 'public/data/views.json');
+const COMMENTS_FILE_DEV = path.join(SECRETS_DIR, 'comments.json');
+const PUBLIC_COMMENTS_FILE_DEV = path.resolve(process.cwd(), 'public/data/comments.json');
+
+// In-memory deduplication & rate limiting for views & comments
+const recentVisitDevFingerprints = new Map<string, number>();
+const recentCommentDevFingerprints = new Map<string, number>();
+const ipCommentDevTimestamps = new Map<string, number[]>();
+
+function getDevViewsCount(): number {
+  try {
+    if (fs.existsSync(ANALYTICS_FILE_DEV)) {
+      const parsed = JSON.parse(fs.readFileSync(ANALYTICS_FILE_DEV, 'utf-8'));
+      const num = parseInt(parsed.views, 10);
+      if (!isNaN(num) && num >= 0) return num;
+    }
+  } catch {}
+  try {
+    if (fs.existsSync(PUBLIC_VIEWS_FILE_DEV)) {
+      const parsed = JSON.parse(fs.readFileSync(PUBLIC_VIEWS_FILE_DEV, 'utf-8'));
+      const num = parseInt(parsed.views, 10);
+      if (!isNaN(num) && num >= 0) return num;
+    }
+  } catch {}
+  return 0;
+}
+
+function incrementDevViewsCount(): number {
+  const current = getDevViewsCount();
+  const next = current + 1;
+  try {
+    if (!fs.existsSync(SECRETS_DIR)) fs.mkdirSync(SECRETS_DIR, { recursive: true });
+    fs.writeFileSync(
+      ANALYTICS_FILE_DEV,
+      JSON.stringify({ views: next, lastIncrementAt: new Date().toISOString() }, null, 2),
+      'utf-8'
+    );
+  } catch {}
+  try {
+    const pubDir = path.dirname(PUBLIC_VIEWS_FILE_DEV);
+    if (!fs.existsSync(pubDir)) fs.mkdirSync(pubDir, { recursive: true });
+    fs.writeFileSync(
+      PUBLIC_VIEWS_FILE_DEV,
+      JSON.stringify({ views: next, lastIncrementAt: new Date().toISOString() }, null, 2),
+      'utf-8'
+    );
+  } catch {}
+  return next;
+}
+
+function getDevCommentsStore(): Record<string, any[]> {
+  try {
+    if (fs.existsSync(COMMENTS_FILE_DEV)) {
+      const raw = fs.readFileSync(COMMENTS_FILE_DEV, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        return parsed.comments || parsed;
+      }
+    }
+  } catch {}
+  try {
+    if (fs.existsSync(PUBLIC_COMMENTS_FILE_DEV)) {
+      const raw = fs.readFileSync(PUBLIC_COMMENTS_FILE_DEV, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        return parsed.comments || parsed;
+      }
+    }
+  } catch {}
+  return {};
+}
+
+function saveDevCommentsStore(commentsMap: Record<string, any[]>): void {
+  const payload = { version: 1, comments: commentsMap, updatedAt: new Date().toISOString() };
+  try {
+    if (!fs.existsSync(SECRETS_DIR)) fs.mkdirSync(SECRETS_DIR, { recursive: true });
+    fs.writeFileSync(COMMENTS_FILE_DEV, JSON.stringify(payload, null, 2), 'utf-8');
+  } catch {}
+  try {
+    const pubDir = path.dirname(PUBLIC_COMMENTS_FILE_DEV);
+    if (!fs.existsSync(pubDir)) fs.mkdirSync(pubDir, { recursive: true });
+    fs.writeFileSync(PUBLIC_COMMENTS_FILE_DEV, JSON.stringify(payload, null, 2), 'utf-8');
+  } catch {}
+}
 
 const SESSION_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -2126,6 +2211,244 @@ export default defineConfig({
             }
           });
         });
+
+        // Endpoint 8: Real-Time Profile Views (/api/views and /__cms/views)
+        const handleViewsEndpoint = (req: any, res: any) => {
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+          res.setHeader('Content-Type', 'application/json');
+
+          if (req.method === 'OPTIONS') {
+            res.statusCode = 200;
+            res.end();
+            return;
+          }
+
+          if (req.method === 'GET') {
+            const count = getDevViewsCount();
+            res.statusCode = 200;
+            res.end(JSON.stringify({ ok: true, views: count }));
+            return;
+          }
+
+          if (req.method === 'POST') {
+            const chunks: Buffer[] = [];
+            req.on('data', (chunk: Buffer) => {
+              chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+            });
+            req.on('end', () => {
+              try {
+                const bodyStr = Buffer.concat(chunks).toString('utf-8');
+                const body = bodyStr ? JSON.parse(bodyStr) : {};
+                const clientIp =
+                  (req.headers['x-forwarded-for'] as string) ||
+                  req.socket?.remoteAddress ||
+                  'local';
+                const sessionId = body.sessionId || body.session || '';
+                const fingerprint = sessionId ? `sess:${sessionId}` : `ip:${clientIp}`;
+                const now = Date.now();
+                const lastVisitAt = recentVisitDevFingerprints.get(fingerprint) || 0;
+
+                // 15-minute cooldown for deduplication
+                if (now - lastVisitAt < 15 * 60 * 1000) {
+                  const currentViews = getDevViewsCount();
+                  res.statusCode = 200;
+                  res.end(
+                    JSON.stringify({
+                      ok: true,
+                      views: currentViews,
+                      incremented: false,
+                      message: 'Session visit already recorded.',
+                    })
+                  );
+                  return;
+                }
+
+                recentVisitDevFingerprints.set(fingerprint, now);
+                const nextViews = incrementDevViewsCount();
+                res.statusCode = 200;
+                res.end(
+                  JSON.stringify({
+                    ok: true,
+                    views: nextViews,
+                    incremented: true,
+                  })
+                );
+              } catch (err) {
+                res.statusCode = 500;
+                res.end(JSON.stringify({ ok: false, error: 'Failed to record view' }));
+              }
+            });
+            return;
+          }
+
+          res.statusCode = 405;
+          res.end(JSON.stringify({ ok: false, error: 'Method Not Allowed' }));
+        };
+
+        server.middlewares.use('/api/views', handleViewsEndpoint);
+        server.middlewares.use('/__cms/views', handleViewsEndpoint);
+
+        // Endpoint 9: Project Comments (/api/comments and /__cms/comments)
+        const handleCommentsEndpoint = (req: any, res: any) => {
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+          res.setHeader('Content-Type', 'application/json');
+
+          if (req.method === 'OPTIONS') {
+            res.statusCode = 200;
+            res.end();
+            return;
+          }
+
+          const parsedUrl = new URL(req.url, 'http://localhost');
+          const clientIp =
+            (req.headers['x-forwarded-for'] as string) ||
+            req.socket?.remoteAddress ||
+            'local';
+
+          if (req.method === 'GET') {
+            const projectId = (parsedUrl.searchParams.get('projectId') || '').trim();
+            if (!projectId) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ ok: false, error: 'projectId is required' }));
+              return;
+            }
+            const commentsStore = getDevCommentsStore();
+            const list = Array.isArray(commentsStore[projectId]) ? commentsStore[projectId] : [];
+            res.statusCode = 200;
+            res.end(JSON.stringify({ ok: true, comments: list }));
+            return;
+          }
+
+          if (req.method === 'POST') {
+            const chunks: Buffer[] = [];
+            req.on('data', (chunk: Buffer) => {
+              chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+            });
+            req.on('end', () => {
+              try {
+                const bodyStr = Buffer.concat(chunks).toString('utf-8');
+                const body = bodyStr ? JSON.parse(bodyStr) : {};
+
+                // Anti-spam honeypot
+                if (body.honeypot && String(body.honeypot).trim() !== '') {
+                  res.statusCode = 400;
+                  res.end(JSON.stringify({ ok: false, error: 'Spam submission rejected.' }));
+                  return;
+                }
+
+                const projectId = (body.projectId || '').trim();
+                const authorName = (body.authorName || '').trim();
+                const content = (body.content || '').trim();
+
+                if (!projectId || projectId.length < 2) {
+                  res.statusCode = 400;
+                  res.end(JSON.stringify({ ok: false, error: 'Invalid project identifier.' }));
+                  return;
+                }
+
+                if (!authorName || authorName.length < 2 || authorName.length > 60) {
+                  res.statusCode = 400;
+                  res.end(
+                    JSON.stringify({
+                      ok: false,
+                      error: 'Please enter your name (2 to 60 characters).',
+                    })
+                  );
+                  return;
+                }
+
+                if (!content || content.length < 3 || content.length > 1000) {
+                  res.statusCode = 400;
+                  res.end(
+                    JSON.stringify({
+                      ok: false,
+                      error: 'Comment must be between 3 and 1000 characters.',
+                    })
+                  );
+                  return;
+                }
+
+                const now = Date.now();
+
+                // Rate limiting (max 4 per 5 minutes per IP)
+                const timestamps = (ipCommentDevTimestamps.get(clientIp) || []).filter(
+                  (ts) => now - ts < 5 * 60 * 1000
+                );
+                if (timestamps.length >= 4) {
+                  res.statusCode = 429;
+                  res.end(
+                    JSON.stringify({
+                      ok: false,
+                      error: 'Too many comments submitted recently. Please wait a few minutes.',
+                    })
+                  );
+                  return;
+                }
+
+                // Duplicate protection (60s)
+                const fingerprint = `${projectId}::${authorName.toLowerCase()}::${content.toLowerCase()}`;
+                const lastAt = recentCommentDevFingerprints.get(fingerprint) || 0;
+                if (now - lastAt < 60 * 1000) {
+                  res.statusCode = 429;
+                  res.end(
+                    JSON.stringify({
+                      ok: false,
+                      error: 'Duplicate comment detected. You have already posted this feedback.',
+                    })
+                  );
+                  return;
+                }
+
+                ipCommentDevTimestamps.set(clientIp, [...timestamps, now]);
+                recentCommentDevFingerprints.set(fingerprint, now);
+
+                const newComment = {
+                  id: `c_${now}_${Math.random().toString(36).substring(2, 8)}`,
+                  projectId,
+                  authorName: escapeHtml(authorName),
+                  content: escapeHtml(content),
+                  createdAt: new Date().toISOString(),
+                  formattedDate: new Date().toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true,
+                  }),
+                };
+
+                const commentsStore = getDevCommentsStore();
+                const existing = Array.isArray(commentsStore[projectId])
+                  ? commentsStore[projectId]
+                  : [];
+                commentsStore[projectId] = [newComment, ...existing];
+                saveDevCommentsStore(commentsStore);
+
+                res.statusCode = 201;
+                res.end(
+                  JSON.stringify({
+                    ok: true,
+                    message: 'Comment posted successfully.',
+                    comment: newComment,
+                  })
+                );
+              } catch (err) {
+                res.statusCode = 500;
+                res.end(JSON.stringify({ ok: false, error: 'Failed to post comment.' }));
+              }
+            });
+            return;
+          }
+
+          res.statusCode = 405;
+          res.end(JSON.stringify({ ok: false, error: 'Method Not Allowed' }));
+        };
+
+        server.middlewares.use('/api/comments', handleCommentsEndpoint);
+        server.middlewares.use('/__cms/comments', handleCommentsEndpoint);
       },
     },
   ],

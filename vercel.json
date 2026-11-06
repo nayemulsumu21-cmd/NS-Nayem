@@ -5,6 +5,22 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/api/views",
+      "destination": "/api/views"
+    },
+    {
+      "source": "/api/comments",
+      "destination": "/api/comments"
+    },
+    {
+      "source": "/__cms/views",
+      "destination": "/api/views"
+    },
+    {
+      "source": "/__cms/comments",
+      "destination": "/api/comments"
+    },
+    {
       "source": "/__cms/email/status",
       "destination": "/api/email-status"
     },

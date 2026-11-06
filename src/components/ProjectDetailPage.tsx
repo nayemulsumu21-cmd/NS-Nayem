@@ -14,11 +14,13 @@ import {
   X,
   Maximize2,
   FileEdit,
+  MessageSquare,
 } from 'lucide-react';
 import { ProjectItem, getProjectBlocks } from '../data/projects';
 import { usePortfolioCMS } from '../context/PortfolioCMSContext';
 import { ProjectCard } from './ProjectCard';
 import { ResponsiveProjectImage } from './ResponsiveProjectImage';
+import { ProjectComments } from './ProjectComments';
 
 interface ProjectDetailPageProps {
   projectId: string;
@@ -48,6 +50,8 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
     url: string;
     caption: string;
   } | null>(null);
+
+  const [commentCount, setCommentCount] = useState<number>(0);
 
   const sourceList = isOwnerMode ? projects : publishedProjects;
 
@@ -249,6 +253,25 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
               <span>Like</span>
               <span className="rounded-md bg-obsidian/70 px-2 py-0.5 text-[11px]">
                 {likesCount.toLocaleString()}
+              </span>
+            </button>
+
+            {/* Comments Jump Button */}
+            <button
+              type="button"
+              onClick={() => {
+                const el = document.getElementById('project-comments-section');
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
+              className="inline-flex items-center gap-2 rounded-xl border border-cream/15 bg-charcoal px-4 py-2 font-display text-xs font-bold uppercase tracking-wider text-cream/85 transition hover:border-[#00BDFF] hover:text-[#00BDFF]"
+              title="Jump to project comments"
+            >
+              <MessageSquare className="h-3.5 w-3.5 text-[#00BDFF]" />
+              <span>Comments</span>
+              <span className="rounded-md bg-obsidian/70 px-2 py-0.5 text-[11px] text-white">
+                {commentCount}
               </span>
             </button>
 
@@ -550,6 +573,21 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
               </span>
             </button>
 
+            {/* Leave a Comment Jump Button */}
+            <button
+              type="button"
+              onClick={() => {
+                const el = document.getElementById('project-comments-section');
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
+              className="inline-flex items-center gap-2.5 rounded-2xl border border-cream/20 bg-obsidian px-6 py-3.5 font-display text-xs font-extrabold uppercase tracking-widest text-cream transition-all hover:border-[#00BDFF] hover:text-[#00BDFF]"
+            >
+              <MessageSquare className="h-4 w-4 text-[#00BDFF]" />
+              <span>Leave a Comment ({commentCount})</span>
+            </button>
+
             {isOwnerMode && (
               <button
                 type="button"
@@ -562,7 +600,7 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
             )}
           </div>
 
-          <div className="mt-5 flex items-center gap-5 text-xs font-semibold text-cream/60">
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-xs font-semibold text-cream/60">
             <span className="inline-flex items-center gap-1.5">
               <Eye className="h-3.5 w-3.5 text-[#ffd8be]" />
               {viewsCount.toLocaleString()} Views
@@ -577,8 +615,20 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
               <Heart className="h-3.5 w-3.5 text-[#f694ff]" />
               {likesCount.toLocaleString()} Likes
             </span>
+            <span>&bull;</span>
+            <span className="inline-flex items-center gap-1.5">
+              <MessageSquare className="h-3.5 w-3.5 text-[#00BDFF]" />
+              {commentCount} Comments
+            </span>
           </div>
         </div>
+
+        {/* Dedicated Project Comments & Feedback System */}
+        <ProjectComments
+          projectId={project.id}
+          projectTitle={project.title}
+          onCommentsCountChange={setCommentCount}
+        />
 
         {/* More Projects Section (Uniform 5-Column Grid) */}
         {relatedProjects.length > 0 && (

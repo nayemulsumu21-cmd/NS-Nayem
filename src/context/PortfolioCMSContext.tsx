@@ -402,7 +402,9 @@ export const PortfolioCMSProvider: React.FC<{ children: React.ReactNode }> = ({
             categories: parsed.categories,
             projects: parsed.projects.map(normalizeProjectDefaults),
             profileViews:
-              typeof parsed.profileViews === 'number' && parsed.profileViews >= 0
+              typeof parsed.profileViews === 'number' &&
+              parsed.profileViews >= 0 &&
+              parsed.profileViews < 20000
                 ? parsed.profileViews
                 : 0,
           };
@@ -720,30 +722,46 @@ export const PortfolioCMSProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, [isOwnerMode]);
 
-  // Hydrate from public/data/cms-store.json on mount and record a genuine profile visit once per session
+  // Hydrate from public/data/cms-store.json on mount and sync genuine profile visits via server-side /api/views
   useEffect(() => {
     let active = true;
 
-    const recordSessionProfileVisit = (basePayload: CMSStorePayload) => {
+    // Real-time server-side view counting with duplicate and reload protection
+    const syncServerProfileViews = async () => {
       try {
-        const alreadyRecorded = sessionStorage.getItem(
-          PROFILE_VISIT_SESSION_KEY
-        );
-        if (!alreadyRecorded) {
-          sessionStorage.setItem(PROFILE_VISIT_SESSION_KEY, '1');
-          const updated: CMSStorePayload = {
-            ...basePayload,
-            profileViews: (basePayload.profileViews ?? 0) + 1,
-          };
-          setStore(updated);
-          persistStoreToDisk(updated);
-          return;
+        let sessionId = '';
+        let isFirstSessionVisit = false;
+        try {
+          sessionId = sessionStorage.getItem(PROFILE_VISIT_SESSION_KEY) || '';
+          if (!sessionId) {
+            sessionId = `sess_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+            sessionStorage.setItem(PROFILE_VISIT_SESSION_KEY, sessionId);
+            isFirstSessionVisit = true;
+          }
+        } catch {
+          // sessionStorage may fail in private browser mode
         }
-      } catch {
-        // Ignore sessionStorage errors
+
+        const method = isFirstSessionVisit ? 'POST' : 'GET';
+        const res = await fetch(`/api/views?t=${Date.now()}`, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          ...(isFirstSessionVisit ? { body: JSON.stringify({ sessionId }) } : {}),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (active && data && typeof data.views === 'number' && data.views >= 0) {
+            setStore((prev) => ({
+              ...prev,
+              profileViews: data.views,
+            }));
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Could not sync profile views from server:', err);
       }
-      setStore(basePayload);
-      persistStoreToDisk(basePayload);
     };
 
     fetch(`/data/cms-store.json?t=${Date.now()}`)
@@ -782,25 +800,28 @@ export const PortfolioCMSProvider: React.FC<{ children: React.ReactNode }> = ({
             ...localOnlyProjects,
           ].map(normalizeProjectDefaults);
 
+          const diskViews =
+            typeof diskData.profileViews === 'number' &&
+            diskData.profileViews >= 0 &&
+            diskData.profileViews < 20000
+              ? diskData.profileViews
+              : 0;
+
           const merged: CMSStorePayload = {
             version: CURRENT_STORE_VERSION,
             siteConfig: normalizeSiteConfigDefaults(diskData.siteConfig),
             categories: diskData.categories,
             projects: mergedProjectsList,
-            profileViews:
-              typeof diskData.profileViews === 'number' &&
-              diskData.profileViews >= 0
-                ? diskData.profileViews
-                : store.profileViews ?? 0,
+            profileViews: diskViews,
           };
-          recordSessionProfileVisit(merged);
-        } else {
-          recordSessionProfileVisit(store);
+          setStore(merged);
         }
+        // Always query authoritative real-time counter
+        syncServerProfileViews();
       })
       .catch(() => {
         if (!active) return;
-        recordSessionProfileVisit(store);
+        syncServerProfileViews();
       });
 
     return () => {
@@ -878,13 +899,14 @@ export const PortfolioCMSProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const updateProfileViews = useCallback(
-    (count: number) => {
-      commitStore((prev) => ({
-        ...prev,
-        profileViews: Math.max(0, count),
-      }));
+    (_count: number) => {
+      // Manual editing is strictly disabled by system design.
+      // Profile views are managed automatically and persistently by the backend.
+      console.warn(
+        'Manual editing of profile views is disabled. View count is managed automatically by the backend.'
+      );
     },
-    [commitStore]
+    []
   );
 
   const saveProjects = useCallback(
@@ -1426,7 +1448,7 @@ export const PortfolioCMSProvider: React.FC<{ children: React.ReactNode }> = ({
   const resetAllToDefaults = useCallback(() => {
     commitStore((prev) => ({
       ...DEFAULT_STORE,
-      profileViews: prev.profileViews ?? 1,
+      profileViews: prev.profileViews ?? 0,
     }));
   }, [commitStore]);
 

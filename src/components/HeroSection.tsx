@@ -34,7 +34,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     siteConfig,
     profileViews,
     isOwnerMode,
-    updateProfileViews,
     updateSiteConfig,
   } = usePortfolioCMS();
   const shouldReduceMotion = useReducedMotion() ?? false;
@@ -455,31 +454,37 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </a>
             </motion.div>
 
-            {/* Subtle Profile View Counter Below the Hero Introduction */}
+            {/* Real-Time Live Profile Views Counter */}
             <motion.div
               key={`views-${animCycle}`}
               {...enter(0.88, { y: slide }, 0.65)}
-              className="mt-5 inline-flex items-center gap-2"
+              className="mt-6 inline-flex items-center"
             >
-              <div className="inline-flex items-center gap-2.5 rounded-full border border-cream/12 bg-obsidian/70 px-4 py-1.5 backdrop-blur-md">
-                <Eye className="h-3.5 w-3.5 text-[#00BDFF]" />
-                <span className="font-display text-[11px] font-bold uppercase tracking-[0.18em] text-cream/75">
-                  PROFILE VIEWS &mdash;{' '}
-                  <strong className="font-extrabold text-[#00BDFF]">
-                    {profileViews.toLocaleString()}
-                  </strong>
-                </span>
+              <div className="group relative inline-flex items-center gap-3.5 rounded-2xl border border-white/20 bg-gradient-to-r from-obsidian/95 via-[#13111c]/90 to-obsidian/95 px-4 sm:px-5 py-2.5 shadow-[0_8px_32px_rgba(0,0,0,0.55)] backdrop-blur-xl ring-1 ring-white/10 transition-all duration-300 hover:border-white/35 hover:shadow-[0_12px_40px_rgba(0,189,255,0.22)]">
+                {/* Visual Status Indicator / Icon */}
+                <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white shadow-inner ring-1 ring-white/20">
+                  <Eye className="h-4 w-4 text-white" />
+                  <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+                  </span>
+                </div>
+
+                {/* Counter Label and Prominent Number */}
+                <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
+                  <span className="font-display text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
+                    PROFILE VIEWS
+                  </span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-display text-xl sm:text-2xl font-black tracking-tight text-white drop-shadow-[0_2px_12px_rgba(255,255,255,0.4)]">
+                      {profileViews.toLocaleString()}
+                    </span>
+                    <span className="inline-flex items-center rounded-md border border-emerald-400/30 bg-emerald-400/10 px-1.5 py-0.5 font-display text-[9px] font-bold uppercase tracking-wider text-emerald-400">
+                      Live
+                    </span>
+                  </div>
+                </div>
               </div>
-              <OwnerEditButton
-                title="Profile Views Counter"
-                description="Set the public profile views counter"
-                type="number"
-                value={String(profileViews)}
-                onSave={(val) => {
-                  const num = parseInt(val, 10);
-                  if (!isNaN(num)) updateProfileViews(num);
-                }}
-              />
             </motion.div>
           </div>
 
