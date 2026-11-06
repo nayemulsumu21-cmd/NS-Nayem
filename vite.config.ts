@@ -54,32 +54,37 @@ const recentVisitDevFingerprints = new Map<string, number>();
 const recentCommentDevFingerprints = new Map<string, number>();
 const ipCommentDevTimestamps = new Map<string, number[]>();
 
+let devViewsWatermark = 0;
+
 function getDevViewsCount(): number {
+  let foundViews = 0;
   try {
     if (fs.existsSync(ANALYTICS_FILE_DEV)) {
       const parsed = JSON.parse(fs.readFileSync(ANALYTICS_FILE_DEV, 'utf-8'));
       const num = parseInt(parsed.views, 10);
-      if (!isNaN(num) && num >= 0) return num;
+      if (!isNaN(num) && num >= 0) foundViews = Math.max(foundViews, num);
     }
   } catch {}
   try {
     if (fs.existsSync(PUBLIC_VIEWS_FILE_DEV)) {
       const parsed = JSON.parse(fs.readFileSync(PUBLIC_VIEWS_FILE_DEV, 'utf-8'));
       const num = parseInt(parsed.views, 10);
-      if (!isNaN(num) && num >= 0) return num;
+      if (!isNaN(num) && num >= 0) foundViews = Math.max(foundViews, num);
     }
   } catch {}
-  return 0;
+  devViewsWatermark = Math.max(devViewsWatermark, foundViews);
+  return devViewsWatermark;
 }
 
 function incrementDevViewsCount(): number {
   const current = getDevViewsCount();
   const next = current + 1;
+  devViewsWatermark = Math.max(devViewsWatermark, next);
   try {
     if (!fs.existsSync(SECRETS_DIR)) fs.mkdirSync(SECRETS_DIR, { recursive: true });
     fs.writeFileSync(
       ANALYTICS_FILE_DEV,
-      JSON.stringify({ views: next, lastIncrementAt: new Date().toISOString() }, null, 2),
+      JSON.stringify({ views: devViewsWatermark, lastIncrementAt: new Date().toISOString() }, null, 2),
       'utf-8'
     );
   } catch {}
@@ -88,11 +93,11 @@ function incrementDevViewsCount(): number {
     if (!fs.existsSync(pubDir)) fs.mkdirSync(pubDir, { recursive: true });
     fs.writeFileSync(
       PUBLIC_VIEWS_FILE_DEV,
-      JSON.stringify({ views: next, lastIncrementAt: new Date().toISOString() }, null, 2),
+      JSON.stringify({ views: devViewsWatermark, lastIncrementAt: new Date().toISOString() }, null, 2),
       'utf-8'
     );
   } catch {}
-  return next;
+  return devViewsWatermark;
 }
 
 function getDevCommentsStore(): Record<string, any[]> {

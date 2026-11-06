@@ -754,7 +754,7 @@ export const PortfolioCMSProvider: React.FC<{ children: React.ReactNode }> = ({
           if (active && data && typeof data.views === 'number' && data.views >= 0) {
             setStore((prev) => ({
               ...prev,
-              profileViews: data.views,
+              profileViews: Math.max(prev.profileViews ?? 0, data.views),
             }));
             return;
           }

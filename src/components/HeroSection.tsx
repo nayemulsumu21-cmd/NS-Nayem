@@ -454,33 +454,29 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </a>
             </motion.div>
 
-            {/* Real-Time Live Profile Views Counter */}
+            {/* Permanent Lifetime Total Website Visits Counter */}
             <motion.div
               key={`views-${animCycle}`}
               {...enter(0.88, { y: slide }, 0.65)}
               className="mt-6 inline-flex items-center"
             >
-              <div className="group relative inline-flex items-center gap-3.5 rounded-2xl border border-white/20 bg-gradient-to-r from-obsidian/95 via-[#13111c]/90 to-obsidian/95 px-4 sm:px-5 py-2.5 shadow-[0_8px_32px_rgba(0,0,0,0.55)] backdrop-blur-xl ring-1 ring-white/10 transition-all duration-300 hover:border-white/35 hover:shadow-[0_12px_40px_rgba(0,189,255,0.22)]">
-                {/* Visual Status Indicator / Icon */}
-                <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white shadow-inner ring-1 ring-white/20">
+              <div className="group relative inline-flex items-center gap-3.5 sm:gap-4 rounded-2xl border border-white/20 bg-gradient-to-r from-obsidian/95 via-[#13111c]/95 to-obsidian/95 px-4 sm:px-6 py-3 shadow-[0_10px_35px_rgba(0,0,0,0.6)] backdrop-blur-xl ring-1 ring-white/10 transition-all duration-300 hover:border-white/35 hover:shadow-[0_14px_45px_rgba(0,189,255,0.2)]">
+                {/* Visual Icon */}
+                <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white shadow-inner ring-1 ring-white/20">
                   <Eye className="h-4 w-4 text-white" />
-                  <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
-                  </span>
                 </div>
 
                 {/* Counter Label and Prominent Number */}
-                <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
-                  <span className="font-display text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3.5">
+                  <span className="font-display text-[11px] sm:text-xs font-black uppercase tracking-[0.22em] text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
                     PROFILE VIEWS
                   </span>
-                  <div className="flex items-baseline gap-2">
-                    <span className="font-display text-xl sm:text-2xl font-black tracking-tight text-white drop-shadow-[0_2px_12px_rgba(255,255,255,0.4)]">
+                  <div className="flex items-center gap-2.5">
+                    <span className="font-display text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-[0_2px_14px_rgba(255,255,255,0.45)]">
                       {profileViews.toLocaleString()}
                     </span>
-                    <span className="inline-flex items-center rounded-md border border-emerald-400/30 bg-emerald-400/10 px-1.5 py-0.5 font-display text-[9px] font-bold uppercase tracking-wider text-emerald-400">
-                      Live
+                    <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-0.5 font-display text-[9px] font-extrabold uppercase tracking-widest text-white/90">
+                      Total Visits
                     </span>
                   </div>
                 </div>

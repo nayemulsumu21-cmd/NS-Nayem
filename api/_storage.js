@@ -34,8 +34,11 @@ function getRedisConfig() {
   return null;
 }
 
+// In-memory lifetime watermark (strictly monotonically increasing, never decreases)
+let lifetimeTotalViewsWatermark = 0;
+
 // ----------------------------------------------------
-// PROFILE VIEWS
+// PERMANENT LIFETIME PROFILE VISITS COUNTER
 // ----------------------------------------------------
 export async function getProfileViews() {
   const redis = getRedisConfig();
@@ -47,7 +50,10 @@ export async function getProfileViews() {
       if (res.ok) {
         const data = await res.json();
         const num = parseInt(data.result, 10);
-        return isNaN(num) || num < 0 ? 0 : num;
+        if (!isNaN(num) && num >= 0) {
+          lifetimeTotalViewsWatermark = Math.max(lifetimeTotalViewsWatermark, num);
+          return lifetimeTotalViewsWatermark;
+        }
       }
     } catch (err) {
       console.warn('Redis getViews error, falling back to disk:', err);
@@ -60,7 +66,9 @@ export async function getProfileViews() {
       const content = fs.readFileSync(ANALYTICS_FILE, 'utf-8');
       const parsed = JSON.parse(content);
       const views = parseInt(parsed.views, 10);
-      return isNaN(views) || views < 0 ? 0 : views;
+      if (!isNaN(views) && views >= 0) {
+        lifetimeTotalViewsWatermark = Math.max(lifetimeTotalViewsWatermark, views);
+      }
     }
   } catch {}
 
@@ -71,17 +79,20 @@ export async function getProfileViews() {
       const content = fs.readFileSync(publicViewsFile, 'utf-8');
       const parsed = JSON.parse(content);
       const views = parseInt(parsed.views, 10);
-      return isNaN(views) || views < 0 ? 0 : views;
+      if (!isNaN(views) && views >= 0) {
+        lifetimeTotalViewsWatermark = Math.max(lifetimeTotalViewsWatermark, views);
+      }
     }
   } catch {}
 
-  return 0;
+  return lifetimeTotalViewsWatermark;
 }
 
 export async function incrementProfileViews() {
   const redis = getRedisConfig();
   if (redis) {
     try {
+      // Atomic increment in Redis (guaranteed cumulative lifetime integer)
       const res = await fetch(`${redis.url}/incr/portfolio:profile_views`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${redis.token}` },
@@ -89,17 +100,21 @@ export async function incrementProfileViews() {
       if (res.ok) {
         const data = await res.json();
         const num = parseInt(data.result, 10);
-        return isNaN(num) || num < 0 ? 1 : num;
+        if (!isNaN(num) && num >= 0) {
+          lifetimeTotalViewsWatermark = Math.max(lifetimeTotalViewsWatermark, num);
+          return lifetimeTotalViewsWatermark;
+        }
       }
     } catch (err) {
       console.warn('Redis incrementViews error, falling back to disk:', err);
     }
   }
 
-  // Filesystem fallback
+  // Fallback persistent accumulation (strictly non-decreasing)
   try {
     const current = await getProfileViews();
-    const next = current + 1;
+    const next = Math.max(lifetimeTotalViewsWatermark + 1, current + 1);
+    lifetimeTotalViewsWatermark = next;
     const dir = path.dirname(ANALYTICS_FILE);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(
@@ -109,7 +124,8 @@ export async function incrementProfileViews() {
     );
     return next;
   } catch {
-    return 1;
+    lifetimeTotalViewsWatermark = Math.max(lifetimeTotalViewsWatermark + 1, 1);
+    return lifetimeTotalViewsWatermark;
   }
 }
 
