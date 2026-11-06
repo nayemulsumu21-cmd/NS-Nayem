@@ -106,7 +106,7 @@ export const ContactSection: React.FC = () => {
       : selectedService;
 
     try {
-      const response = await fetch('/__cms/email/inquiry', {
+      let response = await fetch('/__cms/email/inquiry', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -122,12 +122,83 @@ export const ContactSection: React.FC = () => {
         }),
       });
 
-      const data = await response.json().catch(() => null);
+      let data = await response.json().catch(() => null);
 
+      // Fallback 1: Try /api/inquiry (Vercel / Serverless endpoint)
       if (!response.ok || !data?.ok) {
+        try {
+          const apiRes = await fetch('/api/inquiry', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              clientName: clientName.trim(),
+              clientEmail: clientEmail.trim(),
+              service: selectedService,
+              subject: effectiveSubject,
+              budget: budget.trim() || undefined,
+              message: projectMessage.trim(),
+              honeypot,
+            }),
+          });
+          const apiData = await apiRes.json().catch(() => null);
+          if (apiRes.ok && apiData?.ok) {
+            response = apiRes;
+            data = apiData;
+          }
+        } catch {
+          // Fall through
+        }
+      }
+
+      // Fallback 2: Direct FormSubmit Relay to recipient Gmail (works on static hosting like Netlify / GitHub Pages)
+      if (!response.ok || !data?.ok) {
+        try {
+          const destinationEmail =
+            siteConfig.contact.emailPlaceholder || 'nayemulsumu21@gmail.com';
+          const relayRes = await fetch(
+            `https://formsubmit.co/ajax/${encodeURIComponent(destinationEmail)}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+              },
+              body: JSON.stringify({
+                _subject: `New Project Inquiry — ${clientName.trim()}`,
+                _replyto: clientEmail.trim(),
+                Name: clientName.trim(),
+                Email: clientEmail.trim(),
+                Service: selectedService,
+                Subject: effectiveSubject,
+                Budget: budget.trim() || 'Not specified',
+                Message: projectMessage.trim(),
+                SubmittedAt: new Date().toLocaleString(),
+              }),
+            }
+          );
+          const relayData = await relayRes.json().catch(() => null);
+          if (relayRes.ok && relayData?.success !== 'false') {
+            data = {
+              ok: true,
+              message:
+                "Thank you for reaching out! Your inquiry has been submitted successfully. I'll get back to you as soon as possible.",
+              inquiry: {
+                clientName: clientName.trim(),
+                clientEmail: clientEmail.trim(),
+                subject: effectiveSubject,
+                submittedAtFormatted: new Date().toLocaleString(),
+              },
+            };
+          }
+        } catch {
+          // Fall through
+        }
+      }
+
+      if (!data?.ok) {
         const errorText =
           data?.error ||
-          'Unable to send your inquiry right now. Please check your connection or try again shortly.';
+          `Unable to send your inquiry right now. Please write directly to ${siteConfig.contact.emailPlaceholder || 'nayemulsumu21@gmail.com'}.`;
         setSubmitStatus('error');
         setStatusMessage(errorText);
         setIsSubmitting(false);
@@ -317,6 +388,8 @@ export const ContactSection: React.FC = () => {
                 <a
                   key={social.id}
                   href={social.url}
+                  target={social.url.startsWith('http') ? '_blank' : undefined}
+                  rel={social.url.startsWith('http') ? 'noopener noreferrer' : undefined}
                   onClick={(e) => {
                     if (social.url.startsWith('#')) {
                       e.preventDefault();

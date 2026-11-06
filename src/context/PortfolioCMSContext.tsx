@@ -181,6 +181,25 @@ function normalizeSiteConfigDefaults(
   if (!merged.logoUrl) {
     merged.logoUrl = SITE_CONFIG.logoUrl;
   }
+  if (
+    !merged.contact?.emailPlaceholder ||
+    merged.contact.emailPlaceholder === 'your.email@example.com'
+  ) {
+    merged.contact = {
+      ...(merged.contact || SITE_CONFIG.contact),
+      emailPlaceholder: SITE_CONFIG.contact.emailPlaceholder,
+    };
+  }
+  if (
+    !merged.contact?.socialLinks ||
+    merged.contact.socialLinks.length === 0 ||
+    merged.contact.socialLinks.some((l) => !l.url || l.url.startsWith('#'))
+  ) {
+    merged.contact = {
+      ...(merged.contact || SITE_CONFIG.contact),
+      socialLinks: SITE_CONFIG.contact.socialLinks,
+    };
+  }
   merged.portraits = {
     ...SITE_CONFIG.portraits,
     ...(raw.portraits || {}),

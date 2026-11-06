@@ -70,7 +70,7 @@ export default async function handler(req, res) {
     const rawAppPassword = (
       process.env.SMTP_APP_PASSWORD ||
       process.env.GMAIL_APP_PASSWORD ||
-      'wafm bmws eaor hacd'
+      ''
     ).trim();
     const cleanAppPassword = rawAppPassword.replace(/\s+/g, '');
 
@@ -122,36 +122,40 @@ export default async function handler(req, res) {
 
     // Attempt direct SMTP via nodemailer
     if (cleanAppPassword) {
-      const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-          user: recipientGmail,
-          pass: cleanAppPassword,
-        },
-      });
+      try {
+        const transporter = nodemailer.createTransport({
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
+          auth: {
+            user: recipientGmail,
+            pass: cleanAppPassword,
+          },
+        });
 
-      await transporter.sendMail({
-        from: `"NAYEMUL ISLAM Portfolio" <${recipientGmail}>`,
-        to: recipientGmail,
-        replyTo: `"${clientName}" <${clientEmail}>`,
-        subject: emailSubject,
-        text: textBody,
-        html: htmlBody,
-      });
+        await transporter.sendMail({
+          from: `"NAYEMUL ISLAM Portfolio" <${recipientGmail}>`,
+          to: recipientGmail,
+          replyTo: `"${clientName}" <${clientEmail}>`,
+          subject: emailSubject,
+          text: textBody,
+          html: htmlBody,
+        });
 
-      return res.status(200).json({
-        ok: true,
-        message:
-          "Thank you for reaching out! Your inquiry has been delivered directly to Nayemul's Gmail inbox. I'll get back to you shortly.",
-        inquiry: {
-          clientName,
-          clientEmail,
-          subject,
-          submittedAtFormatted: submittedAt,
-        },
-      });
+        return res.status(200).json({
+          ok: true,
+          message:
+            "Thank you for reaching out! Your inquiry has been delivered directly to Nayemul's Gmail inbox. I'll get back to you shortly.",
+          inquiry: {
+            clientName,
+            clientEmail,
+            subject,
+            submittedAtFormatted: submittedAt,
+          },
+        });
+      } catch (smtpErr) {
+        console.warn('Direct SMTP failed, proceeding to FormSubmit relay:', smtpErr);
+      }
     }
 
     // Fallback: FormSubmit Relay

@@ -4,6 +4,7 @@ node_modules/
 # Production build output (built automatically by Vercel)
 dist/
 dist-ssr/
+Netlify/
 
 # Environment variables & secrets (NEVER commit to GitHub)
 .env
