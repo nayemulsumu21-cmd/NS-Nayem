@@ -246,6 +246,69 @@ const PortfolioCMSContext = createContext<PortfolioCMSContextValue | null>(
   null
 );
 
+async function verifyClientOwnerPassword(password: string): Promise<boolean> {
+  try {
+    const res = await fetch(`/data/auth.json?t=${Date.now()}`);
+    if (!res.ok) return false;
+    const authData = await res.json();
+    if (!authData?.passwordHash || !authData?.salt) return false;
+
+    const enc = new TextEncoder();
+    const keyMaterial = await window.crypto.subtle.importKey(
+      'raw',
+      enc.encode(password),
+      { name: 'PBKDF2' },
+      false,
+      ['deriveBits']
+    );
+    const derived = await window.crypto.subtle.deriveBits(
+      {
+        name: 'PBKDF2',
+        salt: enc.encode(authData.salt),
+        iterations: 100000,
+        hash: 'SHA-512',
+      },
+      keyMaterial,
+      512
+    );
+    const computedHash = Array.from(new Uint8Array(derived))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+
+    if (computedHash === authData.passwordHash) return true;
+
+    // Check compact / spaceless password variant if available
+    const cleanPassword = password.replace(/\s+/g, '');
+    const cleanKeyMaterial = await window.crypto.subtle.importKey(
+      'raw',
+      enc.encode(cleanPassword),
+      { name: 'PBKDF2' },
+      false,
+      ['deriveBits']
+    );
+    const cleanDerived = await window.crypto.subtle.deriveBits(
+      {
+        name: 'PBKDF2',
+        salt: enc.encode(authData.salt),
+        iterations: 100000,
+        hash: 'SHA-512',
+      },
+      cleanKeyMaterial,
+      512
+    );
+    const cleanComputedHash = Array.from(new Uint8Array(cleanDerived))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+
+    return (
+      cleanComputedHash === authData.passwordHash ||
+      cleanComputedHash === authData.altPasswordHash
+    );
+  } catch {
+    return false;
+  }
+}
+
 let pendingPersistTimer: ReturnType<typeof setTimeout> | null = null;
 let latestPendingPayload: CMSStorePayload | null = null;
 
@@ -374,6 +437,9 @@ export const PortfolioCMSProvider: React.FC<{ children: React.ReactNode }> = ({
     } catch {
       // Ignore
     }
+    try {
+      sessionStorage.removeItem('nayemul_owner_session');
+    } catch {}
     setIsOwnerModeState(false);
     setAuthStatus((prev) => ({ ...prev, isOwner: false }));
     setBuilderProjectId(null);
@@ -399,44 +465,24 @@ export const PortfolioCMSProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const login = useCallback(async (username: string, password: string) => {
+    const trimmedUser = (username || '').trim();
+    const trimmedPass = password || '';
+
+    // 1. Try local Vite dev server authentication first
     try {
       const res = await fetch('/__cms/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username: trimmedUser, password: trimmedPass }),
       });
-      const data = await res.json().catch(() => null);
-      if (res.ok && data?.ok) {
-        setIsOwnerModeState(true);
-        setAuthStatus({
-          isOwner: true,
-          configured: true,
-          username: data.username,
-        });
-        return { ok: true };
-      }
-      return {
-        ok: false,
-        error: data?.error || 'Invalid username or password.',
-      };
-    } catch {
-      return { ok: false, error: 'Connection error while authenticating.' };
-    }
-  }, []);
-
-  const setupOwner = useCallback(
-    async (username: string, password: string) => {
-      try {
-        const res = await fetch('/__cms/auth/setup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ username, password }),
-        });
+      if (res.ok) {
         const data = await res.json().catch(() => null);
-        if (res.ok && data?.ok) {
+        if (data?.ok) {
           setIsOwnerModeState(true);
+          try {
+            sessionStorage.setItem('nayemul_owner_session', 'active');
+          } catch {}
           setAuthStatus({
             isOwner: true,
             configured: true,
@@ -446,35 +492,97 @@ export const PortfolioCMSProvider: React.FC<{ children: React.ReactNode }> = ({
         }
         return {
           ok: false,
-          error: data?.error || 'Failed to initialize owner account.',
+          error: data?.error || 'Invalid owner username or password.',
         };
-      } catch {
-        return { ok: false, error: 'Connection error during setup.' };
       }
+      if (res.status === 401 || res.status === 429) {
+        const data = await res.json().catch(() => null);
+        return {
+          ok: false,
+          error: data?.error || 'Invalid owner username or password.',
+        };
+      }
+    } catch {
+      // Local server middleware not available (e.g. deployed to Netlify / Vercel / static hosting)
+    }
+
+    // 2. Netlify / Static hosting fallback: Cryptographic PBKDF2 verification via Web Crypto API
+    try {
+      if (trimmedUser.toLowerCase() !== 'nayemul21') {
+        return { ok: false, error: 'Invalid owner username or password.' };
+      }
+      const isValid = await verifyClientOwnerPassword(trimmedPass);
+      if (isValid) {
+        setIsOwnerModeState(true);
+        try {
+          sessionStorage.setItem('nayemul_owner_session', 'active');
+        } catch {}
+        setAuthStatus({
+          isOwner: true,
+          configured: true,
+          username: 'nayemul21',
+        });
+        return { ok: true };
+      }
+      return { ok: false, error: 'Invalid owner username or password.' };
+    } catch {
+      return { ok: false, error: 'Authentication verification failed.' };
+    }
+  }, []);
+
+  const setupOwner = useCallback(
+    async () => {
+      return {
+        ok: false,
+        error:
+          'Public registration is permanently disabled. Only the designated website owner can authenticate.',
+      };
     },
     []
   );
 
-  // Validate owner session with backend on initial load
+  // Validate owner session with backend on initial load or restore static session
   useEffect(() => {
     let active = true;
+    let isStaticSession = false;
+    try {
+      isStaticSession = sessionStorage.getItem('nayemul_owner_session') === 'active';
+    } catch {}
+
     fetch('/__cms/auth/status', { credentials: 'include' })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error('Static hosting');
+        return res.json();
+      })
       .then((data) => {
         if (!active) return;
         if (data?.ok) {
-          const isOwner = Boolean(data.isOwner);
+          const isOwner = Boolean(data.isOwner) || isStaticSession;
           setAuthStatus({
             isOwner,
-            configured: Boolean(data.configured),
-            username: data.username || null,
+            configured: true,
+            username: data.username || (isStaticSession ? 'nayemul21' : null),
           });
           setIsOwnerModeState(isOwner);
         }
       })
       .catch(() => {
         if (!active) return;
-        setIsOwnerModeState(false);
+        if (isStaticSession) {
+          setAuthStatus({
+            isOwner: true,
+            configured: true,
+            username: 'nayemul21',
+          });
+          setIsOwnerModeState(true);
+        } else {
+          setAuthStatus({
+            isOwner: false,
+            configured: true,
+            username: null,
+          });
+          setIsOwnerModeState(false);
+        }
       });
     return () => {
       active = false;

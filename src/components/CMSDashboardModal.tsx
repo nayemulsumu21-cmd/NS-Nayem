@@ -26,6 +26,7 @@ import {
   Loader2,
   KeyRound,
   Inbox,
+  Download,
 } from 'lucide-react';
 import {
   usePortfolioCMS,
@@ -526,6 +527,35 @@ export const CMSDashboardModal: React.FC = () => {
                     {statusBanner}
                   </span>
                 )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const exportPayload = {
+                      version: 1,
+                      siteConfig,
+                      categories,
+                      projects,
+                    };
+                    const blob = new Blob(
+                      [JSON.stringify(exportPayload, null, 2)],
+                      { type: 'application/json' }
+                    );
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'cms-store.json';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                    showToast('Database exported as cms-store.json');
+                  }}
+                  title="Download cms-store.json database backup"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-[#00BDFF]/35 bg-[#141d2f] px-3 py-2 text-xs font-semibold text-[#00BDFF] transition hover:border-[#00BDFF] hover:bg-[#00BDFF]/20"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Export JSON</span>
+                </button>
                 <button
                   type="button"
                   onClick={() => {

@@ -1,0 +1,27 @@
+[
+  {
+    "id": "all",
+    "code": "01",
+    "label": "ALL DESIGNS",
+    "shortDesc": "Complete curated portfolio",
+    "isSystemAll": true
+  },
+  {
+    "id": "logo",
+    "code": "02",
+    "label": "LOGO DESIGN",
+    "shortDesc": "Logomarks, monograms & symbols"
+  },
+  {
+    "id": "brand-guideline",
+    "code": "03",
+    "label": "BRAND STYLE GUIDE",
+    "shortDesc": "Identity rules, color & typography systems"
+  },
+  {
+    "id": "social-media",
+    "code": "04",
+    "label": "SOCIAL MEDIA DESIGN",
+    "shortDesc": "Campaign visuals & social post layouts"
+  }
+]
