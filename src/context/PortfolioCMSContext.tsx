@@ -65,6 +65,8 @@ interface PortfolioCMSContextValue {
   publishedProjects: ProjectItem[];
   draftProjects: ProjectItem[];
   featuredProjects: ProjectItem[];
+  totalProjectViews: number;
+  totalAppreciations: number;
   profileViews: number;
   updateProfileViews: (count: number) => void;
   likedProjectIds: string[];
@@ -143,6 +145,9 @@ const VIEWED_PROJECTS_SESSION_KEY = 'nayemul_viewed_projects_session_v1';
 const PROFILE_VISIT_SESSION_KEY = 'nayemul_profile_visit_session_v1';
 const OWNER_MODE_KEY = 'nayemul_owner_mode_v1';
 const CURRENT_STORE_VERSION = 1;
+
+// In-memory rapid deduplication guard to prevent React StrictMode & re-render duplicate increments
+const recentClientViewRecordings = new Map<string, number>();
 
 function normalizeProjectDefaults(proj: ProjectItem, index: number): ProjectItem {
   return {
@@ -403,8 +408,7 @@ export const PortfolioCMSProvider: React.FC<{ children: React.ReactNode }> = ({
             projects: parsed.projects.map(normalizeProjectDefaults),
             profileViews:
               typeof parsed.profileViews === 'number' &&
-              parsed.profileViews >= 0 &&
-              parsed.profileViews < 20000
+              parsed.profileViews >= 0
                 ? parsed.profileViews
                 : 0,
           };
@@ -726,36 +730,56 @@ export const PortfolioCMSProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     let active = true;
 
-    // Real-time server-side view counting with duplicate and reload protection
+    // Real-time server-side view & appreciation counting with duplicate and reload protection
     const syncServerProfileViews = async () => {
       try {
         let sessionId = '';
-        let isFirstSessionVisit = false;
         try {
           sessionId = sessionStorage.getItem(PROFILE_VISIT_SESSION_KEY) || '';
           if (!sessionId) {
             sessionId = `sess_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
             sessionStorage.setItem(PROFILE_VISIT_SESSION_KEY, sessionId);
-            isFirstSessionVisit = true;
           }
         } catch {
           // sessionStorage may fail in private browser mode
         }
 
-        const method = isFirstSessionVisit ? 'POST' : 'GET';
         const res = await fetch(`/api/views?t=${Date.now()}`, {
-          method,
+          method: 'GET',
           headers: { 'Content-Type': 'application/json' },
-          ...(isFirstSessionVisit ? { body: JSON.stringify({ sessionId }) } : {}),
         });
 
         if (res.ok) {
           const data = await res.json();
-          if (active && data && typeof data.views === 'number' && data.views >= 0) {
-            setStore((prev) => ({
-              ...prev,
-              profileViews: Math.max(prev.profileViews ?? 0, data.views),
-            }));
+          if (active && data && data.ok) {
+            setStore((prev) => {
+              const serverViews = data.byProject?.views || {};
+              const serverAppr = data.byProject?.appreciations || {};
+              const updatedProjects = prev.projects.map((p) => {
+                const sv = serverViews[p.id];
+                const sa = serverAppr[p.id];
+                return {
+                  ...p,
+                  views:
+                    typeof sv === 'number' && sv >= 0
+                      ? Math.max(p.views ?? 0, sv)
+                      : p.views ?? 0,
+                  appreciations:
+                    typeof sa === 'number' && sa >= 0
+                      ? Math.max(p.appreciations ?? 0, sa)
+                      : p.appreciations ?? 0,
+                };
+              });
+
+              return {
+                ...prev,
+                projects: updatedProjects,
+                profileViews:
+                  typeof data.projectViews === 'number'
+                    ? Math.max(prev.profileViews ?? 0, data.projectViews)
+                    : prev.profileViews ?? 0,
+              };
+            });
             return;
           }
         }
@@ -802,8 +826,7 @@ export const PortfolioCMSProvider: React.FC<{ children: React.ReactNode }> = ({
 
           const diskViews =
             typeof diskData.profileViews === 'number' &&
-            diskData.profileViews >= 0 &&
-            diskData.profileViews < 20000
+            diskData.profileViews >= 0
               ? diskData.profileViews
               : 0;
 
@@ -1023,34 +1046,78 @@ export const PortfolioCMSProvider: React.FC<{ children: React.ReactNode }> = ({
     [commitStore]
   );
 
-  // Record a unique project view once per visitor session when opening a project
+  // Record a genuine project view (with client deduplication against React StrictMode & rapid re-renders)
   const recordProjectView = useCallback(
     (id: string) => {
+      if (!id) return;
+
+      const now = Date.now();
+      const lastRecorded = recentClientViewRecordings.get(id) || 0;
+      // 10-second client deduplication window to ignore StrictMode double-invocations & re-renders
+      if (now - lastRecorded < 10000) {
+        return;
+      }
+      recentClientViewRecordings.set(id, now);
+
+      let sessionId = '';
       try {
-        const viewed = readStringArrayFromStorage(
-          sessionStorage,
-          VIEWED_PROJECTS_SESSION_KEY
-        );
-        if (viewed.includes(id)) {
-          return;
+        sessionId = sessionStorage.getItem(PROFILE_VISIT_SESSION_KEY) || '';
+        if (!sessionId) {
+          sessionId = `sess_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+          sessionStorage.setItem(PROFILE_VISIT_SESSION_KEY, sessionId);
         }
-        const nextViewed = [...viewed, id];
-        sessionStorage.setItem(
-          VIEWED_PROJECTS_SESSION_KEY,
-          JSON.stringify(nextViewed)
-        );
       } catch {
-        // Proceed even if sessionStorage is restricted
+        // sessionStorage may fail in private browser mode
       }
 
-      commitStore((prev) => ({
+      // 1. Optimistic local update
+      setStore((prev) => ({
         ...prev,
         projects: prev.projects.map((p) =>
           p.id === id ? { ...p, views: (p.views ?? 0) + 1 } : p
         ),
       }));
+
+      // 2. Server-side persistent increment with duplicate protection
+      fetch(`/api/views?t=${Date.now()}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'view',
+          projectId: id,
+          sessionId,
+        }),
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data && data.ok && data.byProject) {
+            setStore((prev) => {
+              const serverViews = data.byProject?.views || {};
+              const serverAppr = data.byProject?.appreciations || {};
+              return {
+                ...prev,
+                projects: prev.projects.map((p) => {
+                  const sv = serverViews[p.id];
+                  const sa = serverAppr[p.id];
+                  return {
+                    ...p,
+                    views:
+                      typeof sv === 'number' && sv >= 0
+                        ? Math.max(p.views ?? 0, sv)
+                        : p.views ?? 0,
+                    appreciations:
+                      typeof sa === 'number' && sa >= 0
+                        ? Math.max(p.appreciations ?? 0, sa)
+                        : p.appreciations ?? 0,
+                  };
+                }),
+              };
+            });
+          }
+        })
+        .catch(() => {});
     },
-    [commitStore]
+    []
   );
 
   // Toggle project Like (prevents unlimited repeated likes from the same visitor)
@@ -1088,7 +1155,7 @@ export const PortfolioCMSProvider: React.FC<{ children: React.ReactNode }> = ({
     [commitStore]
   );
 
-  // Toggle project Appreciation (prevents unlimited repeated appreciations from the same visitor)
+  // Toggle project Appreciation (updates persistent database and ensures single appreciation per visitor)
   const toggleProjectAppreciation = useCallback(
     (id: string) => {
       setAppreciatedProjectIds((prevAppreciated) => {
@@ -1106,7 +1173,8 @@ export const PortfolioCMSProvider: React.FC<{ children: React.ReactNode }> = ({
           // Ignore
         }
 
-        commitStore((prevStore) => ({
+        // Optimistic update
+        setStore((prevStore) => ({
           ...prevStore,
           projects: prevStore.projects.map((p) => {
             if (p.id !== id) return p;
@@ -1120,10 +1188,54 @@ export const PortfolioCMSProvider: React.FC<{ children: React.ReactNode }> = ({
           }),
         }));
 
+        let sessionId = '';
+        try {
+          sessionId = sessionStorage.getItem(PROFILE_VISIT_SESSION_KEY) || '';
+        } catch {}
+
+        // Persistent database update on server
+        fetch(`/api/views?t=${Date.now()}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: alreadyAppreciated ? 'unappreciate' : 'appreciate',
+            projectId: id,
+            sessionId,
+          }),
+        })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            if (data && data.ok && data.byProject) {
+              setStore((prev) => {
+                const serverViews = data.byProject?.views || {};
+                const serverAppr = data.byProject?.appreciations || {};
+                return {
+                  ...prev,
+                  projects: prev.projects.map((p) => {
+                    const sv = serverViews[p.id];
+                    const sa = serverAppr[p.id];
+                    return {
+                      ...p,
+                      views:
+                        typeof sv === 'number' && sv >= 0
+                          ? Math.max(p.views ?? 0, sv)
+                          : p.views ?? 0,
+                      appreciations:
+                        typeof sa === 'number' && sa >= 0
+                          ? Math.max(p.appreciations ?? 0, sa)
+                          : p.appreciations ?? 0,
+                    };
+                  }),
+                };
+              });
+            }
+          })
+          .catch(() => {});
+
         return nextAppreciated;
       });
     },
-    [commitStore]
+    []
   );
 
   const renumberCategories = (cats: CategoryTabItem[]): CategoryTabItem[] => {
@@ -1480,6 +1592,15 @@ export const PortfolioCMSProvider: React.FC<{ children: React.ReactNode }> = ({
     return feat.length > 0 ? feat : publishedProjects.slice(0, 4);
   }, [publishedProjects]);
 
+  // Aggregated profile lifetime statistics strictly calculated from all published projects
+  const totalProjectViews = useMemo(() => {
+    return publishedProjects.reduce((acc, p) => acc + (p.views ?? 0), 0);
+  }, [publishedProjects]);
+
+  const totalAppreciations = useMemo(() => {
+    return publishedProjects.reduce((acc, p) => acc + (p.appreciations ?? 0), 0);
+  }, [publishedProjects]);
+
   const value = useMemo<PortfolioCMSContextValue>(
     () => ({
       siteConfig: store.siteConfig,
@@ -1489,7 +1610,9 @@ export const PortfolioCMSProvider: React.FC<{ children: React.ReactNode }> = ({
       publishedProjects,
       draftProjects,
       featuredProjects,
-      profileViews: store.profileViews ?? 0,
+      totalProjectViews,
+      totalAppreciations,
+      profileViews: totalProjectViews,
       updateProfileViews,
       likedProjectIds,
       appreciatedProjectIds,
@@ -1550,6 +1673,8 @@ export const PortfolioCMSProvider: React.FC<{ children: React.ReactNode }> = ({
       publishedProjects,
       draftProjects,
       featuredProjects,
+      totalProjectViews,
+      totalAppreciations,
       store.profileViews,
       updateProfileViews,
       likedProjectIds,

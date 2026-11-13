@@ -12,7 +12,7 @@ import {
   useSpring,
   useTransform,
 } from 'framer-motion';
-import { ArrowDownRight, ArrowUpRight, Eye, Layers, Sparkles } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, Eye, Layers, Sparkles, ThumbsUp } from 'lucide-react';
 import { usePortfolioCMS } from '../context/PortfolioCMSContext';
 import { PortraitFrame } from './PortraitFrame';
 import { NavSectionId } from './Navbar';
@@ -32,7 +32,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 }) => {
   const {
     siteConfig,
-    profileViews,
+    totalProjectViews,
+    totalAppreciations,
     isOwnerMode,
     updateSiteConfig,
   } = usePortfolioCMS();
@@ -454,29 +455,45 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </a>
             </motion.div>
 
-            {/* Permanent Lifetime Total Website Visits Counter */}
+            {/* Behance-Style Profile Statistics Module (Project Views & Appreciations) */}
             <motion.div
-              key={`views-${animCycle}`}
+              key={`stats-${animCycle}`}
               {...enter(0.88, { y: slide }, 0.65)}
-              className="mt-6 inline-flex items-center"
+              className="mt-6 inline-flex max-w-full"
             >
-              <div className="group relative inline-flex items-center gap-3.5 sm:gap-4 rounded-2xl border border-white/20 bg-gradient-to-r from-obsidian/95 via-[#13111c]/95 to-obsidian/95 px-4 sm:px-6 py-3 shadow-[0_10px_35px_rgba(0,0,0,0.6)] backdrop-blur-xl ring-1 ring-white/10 transition-all duration-300 hover:border-white/35 hover:shadow-[0_14px_45px_rgba(0,189,255,0.2)]">
-                {/* Visual Icon */}
-                <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white shadow-inner ring-1 ring-white/20">
-                  <Eye className="h-4 w-4 text-white" />
+              <div className="group relative flex flex-row flex-wrap sm:flex-nowrap items-center gap-4 sm:gap-6 rounded-2xl border border-white/20 bg-gradient-to-r from-obsidian/95 via-[#13111c]/95 to-obsidian/95 px-4 sm:px-6 py-3.5 shadow-[0_10px_35px_rgba(0,0,0,0.6)] backdrop-blur-xl ring-1 ring-white/10 transition-all duration-300 hover:border-white/35 hover:shadow-[0_14px_45px_rgba(0,189,255,0.18)]">
+                {/* 01 — PROJECT VIEWS */}
+                <div className="flex items-center gap-3">
+                  <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 text-[#00BDFF] shadow-inner ring-1 ring-white/20 transition-transform duration-300 group-hover:scale-105">
+                    <Eye className="h-4 w-4 text-[#00BDFF]" />
+                  </div>
+                  <div className="flex flex-col justify-center">
+                    <span className="font-display text-base sm:text-lg font-black tracking-tight text-[#00BDFF] drop-shadow-[0_1px_8px_rgba(0,189,255,0.35)] leading-tight">
+                      {totalProjectViews.toLocaleString()}
+                    </span>
+                    <span className="font-display text-xs sm:text-[13px] font-extrabold uppercase tracking-wider text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] leading-tight">
+                      PROJECT VIEWS
+                    </span>
+                  </div>
                 </div>
 
-                {/* Counter Label and Prominent Number */}
-                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3.5">
-                  <span className="font-display text-[11px] sm:text-xs font-black uppercase tracking-[0.22em] text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
-                    PROFILE VIEWS
-                  </span>
-                  <div className="flex items-center gap-2.5">
-                    <span className="font-display text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-[0_2px_14px_rgba(255,255,255,0.45)]">
-                      {profileViews.toLocaleString()}
+                {/* Subtle Behance-Style Divider */}
+                <div
+                  className="hidden sm:block h-8 w-px bg-white/15"
+                  aria-hidden="true"
+                />
+
+                {/* 02 — APPRECIATIONS */}
+                <div className="flex items-center gap-3">
+                  <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 text-[#00BDFF] shadow-inner ring-1 ring-white/20 transition-transform duration-300 group-hover:scale-105">
+                    <ThumbsUp className="h-4 w-4 text-[#00BDFF]" />
+                  </div>
+                  <div className="flex flex-col justify-center">
+                    <span className="font-display text-base sm:text-lg font-black tracking-tight text-[#00BDFF] drop-shadow-[0_1px_8px_rgba(0,189,255,0.35)] leading-tight">
+                      {totalAppreciations.toLocaleString()}
                     </span>
-                    <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-0.5 font-display text-[9px] font-extrabold uppercase tracking-widest text-white/90">
-                      Total Visits
+                    <span className="font-display text-xs sm:text-[13px] font-extrabold uppercase tracking-wider text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] leading-tight">
+                      APPRECIATIONS
                     </span>
                   </div>
                 </div>

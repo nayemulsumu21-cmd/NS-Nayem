@@ -45,7 +45,10 @@ const INQUIRIES_LOG_PATH = path.join(SECRETS_DIR, 'inquiries-log.json');
 const AUTH_CONFIG_PATH = path.join(SECRETS_DIR, 'auth-config.json');
 const SESSIONS_PATH = path.join(SECRETS_DIR, 'sessions.json');
 const ANALYTICS_FILE_DEV = path.join(SECRETS_DIR, 'analytics.json');
+const PROJECT_STATS_FILE_DEV = path.join(SECRETS_DIR, 'project-stats.json');
 const PUBLIC_VIEWS_FILE_DEV = path.resolve(process.cwd(), 'public/data/views.json');
+const PUBLIC_PROJECT_STATS_FILE_DEV = path.resolve(process.cwd(), 'public/data/project-stats.json');
+const PUBLIC_CMS_STORE_DEV = path.resolve(process.cwd(), 'public/data/cms-store.json');
 const COMMENTS_FILE_DEV = path.join(SECRETS_DIR, 'comments.json');
 const PUBLIC_COMMENTS_FILE_DEV = path.resolve(process.cwd(), 'public/data/comments.json');
 
@@ -55,6 +58,136 @@ const recentCommentDevFingerprints = new Map<string, number>();
 const ipCommentDevTimestamps = new Map<string, number[]>();
 
 let devViewsWatermark = 0;
+let devTotalProjectViewsWatermark = 0;
+let devTotalAppreciationsWatermark = 0;
+const devProjectViewsMap = new Map<string, number>();
+const devProjectAppreciationsMap = new Map<string, number>();
+
+function readJsonDevSafe(filePath: string): any {
+  try {
+    if (fs.existsSync(filePath)) {
+      return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    }
+  } catch {}
+  return null;
+}
+
+function writeJsonDevSafe(filePath: string, data: any): void {
+  try {
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+  } catch {}
+}
+
+function getDevBaseProjects(): any[] {
+  const store = readJsonDevSafe(PUBLIC_CMS_STORE_DEV);
+  if (store && Array.isArray(store.projects)) {
+    return store.projects;
+  }
+  const projs = readJsonDevSafe(path.resolve(process.cwd(), 'public/data/projects.json'));
+  if (Array.isArray(projs)) {
+    return projs;
+  }
+  return [];
+}
+
+function getDevProjectStats() {
+  const baseProjects = getDevBaseProjects();
+  const fileStats = readJsonDevSafe(PROJECT_STATS_FILE_DEV) || readJsonDevSafe(PUBLIC_PROJECT_STATS_FILE_DEV) || {};
+
+  const viewsMap: Record<string, number> = {};
+  const appreciationsMap: Record<string, number> = {};
+
+  for (const p of baseProjects) {
+    if (!p || !p.id) continue;
+    viewsMap[p.id] = Math.max(0, parseInt(p.views, 10) || 0);
+    appreciationsMap[p.id] = Math.max(0, parseInt(p.appreciations, 10) || 0);
+  }
+
+  if (fileStats.views && typeof fileStats.views === 'object') {
+    for (const [k, v] of Object.entries(fileStats.views)) {
+      const num = parseInt(v as string, 10);
+      if (!isNaN(num) && num >= 0) viewsMap[k] = Math.max(viewsMap[k] || 0, num);
+    }
+  }
+  if (fileStats.appreciations && typeof fileStats.appreciations === 'object') {
+    for (const [k, v] of Object.entries(fileStats.appreciations)) {
+      const num = parseInt(v as string, 10);
+      if (!isNaN(num) && num >= 0) appreciationsMap[k] = Math.max(0, num);
+    }
+  }
+
+  for (const [k, v] of devProjectViewsMap.entries()) {
+    viewsMap[k] = Math.max(viewsMap[k] || 0, v);
+  }
+  for (const [k, v] of devProjectAppreciationsMap.entries()) {
+    appreciationsMap[k] = Math.max(0, v);
+  }
+
+  for (const [k, v] of Object.entries(viewsMap)) devProjectViewsMap.set(k, v);
+  for (const [k, v] of Object.entries(appreciationsMap)) devProjectAppreciationsMap.set(k, v);
+
+  let totalViews = 0;
+  let totalAppr = 0;
+
+  for (const p of baseProjects) {
+    if (!p || !p.id) continue;
+    const isPublished = p.status !== 'draft' && p.visible !== false;
+    if (isPublished) {
+      totalViews += viewsMap[p.id] || 0;
+      totalAppr += appreciationsMap[p.id] || 0;
+    }
+  }
+
+  devTotalProjectViewsWatermark = Math.max(devTotalProjectViewsWatermark, totalViews);
+
+  return {
+    projectViews: devTotalProjectViewsWatermark,
+    appreciations: totalAppr,
+    views: devTotalProjectViewsWatermark,
+    byProject: {
+      views: viewsMap,
+      appreciations: appreciationsMap,
+    },
+  };
+}
+
+function recordDevProjectView(projectId: string) {
+  const stats = getDevProjectStats();
+  const current = stats.byProject.views[projectId] || 0;
+  const next = current + 1;
+  stats.byProject.views[projectId] = next;
+  devProjectViewsMap.set(projectId, next);
+
+  const payload = {
+    views: stats.byProject.views,
+    appreciations: stats.byProject.appreciations,
+    updatedAt: new Date().toISOString(),
+  };
+  writeJsonDevSafe(PROJECT_STATS_FILE_DEV, payload);
+  writeJsonDevSafe(PUBLIC_PROJECT_STATS_FILE_DEV, payload);
+
+  return getDevProjectStats();
+}
+
+function recordDevProjectAppreciation(projectId: string, delta: number) {
+  const stats = getDevProjectStats();
+  const current = stats.byProject.appreciations[projectId] || 0;
+  const next = Math.max(0, current + delta);
+  stats.byProject.appreciations[projectId] = next;
+  devProjectAppreciationsMap.set(projectId, next);
+
+  const payload = {
+    views: stats.byProject.views,
+    appreciations: stats.byProject.appreciations,
+    updatedAt: new Date().toISOString(),
+  };
+  writeJsonDevSafe(PROJECT_STATS_FILE_DEV, payload);
+  writeJsonDevSafe(PUBLIC_PROJECT_STATS_FILE_DEV, payload);
+
+  return getDevProjectStats();
+}
 
 function getDevViewsCount(): number {
   let foundViews = 0;
@@ -2230,9 +2363,17 @@ export default defineConfig({
           }
 
           if (req.method === 'GET') {
-            const count = getDevViewsCount();
+            const stats = getDevProjectStats();
             res.statusCode = 200;
-            res.end(JSON.stringify({ ok: true, views: count }));
+            res.end(
+              JSON.stringify({
+                ok: true,
+                projectViews: stats.projectViews,
+                appreciations: stats.appreciations,
+                views: stats.projectViews,
+                byProject: stats.byProject,
+              })
+            );
             return;
           }
 
@@ -2250,38 +2391,99 @@ export default defineConfig({
                   req.socket?.remoteAddress ||
                   'local';
                 const sessionId = body.sessionId || body.session || '';
-                const fingerprint = sessionId ? `sess:${sessionId}` : `ip:${clientIp}`;
+                const projectId = body.projectId || '';
+                const action = body.action || (projectId ? 'view' : 'profile_view');
                 const now = Date.now();
-                const lastVisitAt = recentVisitDevFingerprints.get(fingerprint) || 0;
 
-                // 15-minute cooldown for deduplication
-                if (now - lastVisitAt < 15 * 60 * 1000) {
-                  const currentViews = getDevViewsCount();
+                // 1. GENUINE PROJECT VIEW RECORDING
+                if (action === 'view' && projectId) {
+                  const fingerprint = sessionId
+                    ? `view:${sessionId}:${projectId}`
+                    : `view:${clientIp}:${projectId}`;
+                  const lastVisitAt = recentVisitDevFingerprints.get(fingerprint) || 0;
+
+                  // Duplicate protection: 15-minute cooldown per session/IP & project
+                  if (now - lastVisitAt < 15 * 60 * 1000) {
+                    const stats = getDevProjectStats();
+                    res.statusCode = 200;
+                    res.end(
+                      JSON.stringify({
+                        ok: true,
+                        incremented: false,
+                        message: 'Project view already recorded in this session.',
+                        projectViews: stats.projectViews,
+                        appreciations: stats.appreciations,
+                        views: stats.projectViews,
+                        byProject: stats.byProject,
+                      })
+                    );
+                    return;
+                  }
+
+                  recentVisitDevFingerprints.set(fingerprint, now);
+                  const stats = recordDevProjectView(projectId);
                   res.statusCode = 200;
                   res.end(
                     JSON.stringify({
                       ok: true,
-                      views: currentViews,
-                      incremented: false,
-                      message: 'Session visit already recorded.',
+                      incremented: true,
+                      projectViews: stats.projectViews,
+                      appreciations: stats.appreciations,
+                      views: stats.projectViews,
+                      byProject: stats.byProject,
                     })
                   );
                   return;
                 }
 
-                recentVisitDevFingerprints.set(fingerprint, now);
-                const nextViews = incrementDevViewsCount();
+                // 2. PROJECT APPRECIATION
+                if (action === 'appreciate' && projectId) {
+                  const stats = recordDevProjectAppreciation(projectId, 1);
+                  res.statusCode = 200;
+                  res.end(
+                    JSON.stringify({
+                      ok: true,
+                      incremented: true,
+                      projectViews: stats.projectViews,
+                      appreciations: stats.appreciations,
+                      views: stats.projectViews,
+                      byProject: stats.byProject,
+                    })
+                  );
+                  return;
+                }
+
+                // 3. PROJECT UN-APPRECIATION (UNDO)
+                if (action === 'unappreciate' && projectId) {
+                  const stats = recordDevProjectAppreciation(projectId, -1);
+                  res.statusCode = 200;
+                  res.end(
+                    JSON.stringify({
+                      ok: true,
+                      incremented: false,
+                      projectViews: stats.projectViews,
+                      appreciations: stats.appreciations,
+                      views: stats.projectViews,
+                      byProject: stats.byProject,
+                    })
+                  );
+                  return;
+                }
+
+                const stats = getDevProjectStats();
                 res.statusCode = 200;
                 res.end(
                   JSON.stringify({
                     ok: true,
-                    views: nextViews,
-                    incremented: true,
+                    projectViews: stats.projectViews,
+                    appreciations: stats.appreciations,
+                    views: stats.projectViews,
+                    byProject: stats.byProject,
                   })
                 );
               } catch (err) {
                 res.statusCode = 500;
-                res.end(JSON.stringify({ ok: false, error: 'Failed to record view' }));
+                res.end(JSON.stringify({ ok: false, error: 'Failed to record statistics' }));
               }
             });
             return;

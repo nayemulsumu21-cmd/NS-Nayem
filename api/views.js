@@ -1,6 +1,10 @@
-import { getProfileViews, incrementProfileViews } from './_storage.js';
+import {
+  getProjectStatistics,
+  recordProjectView,
+  recordProjectAppreciation,
+} from './_storage.js';
 
-// In-memory rate limiting and duplicate prevention for views (15-minute cooldown per session/IP)
+// In-memory rate limiting and duplicate prevention for views (15-minute cooldown per session/IP/project)
 const recentVisitFingerprints = new Map();
 const COOLDOWN_MS = 15 * 60 * 1000; // 15 minutes
 
@@ -27,8 +31,14 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
-      const views = await getProfileViews();
-      return res.status(200).json({ ok: true, views });
+      const stats = await getProjectStatistics();
+      return res.status(200).json({
+        ok: true,
+        projectViews: stats.projectViews,
+        appreciations: stats.appreciations,
+        views: stats.projectViews,
+        byProject: stats.byProject,
+      });
     }
 
     if (req.method === 'POST') {
@@ -38,36 +48,85 @@ export default async function handler(req, res) {
         req.socket?.remoteAddress ||
         'local';
       const sessionId = body.sessionId || body.session || '';
+      const projectId = body.projectId || '';
+      const action = body.action || (projectId ? 'view' : 'profile_view');
 
-      // Generate fingerprint based on IP or Session ID
-      const fingerprint = sessionId ? `sess:${sessionId}` : `ip:${clientIp}`;
-      const lastVisitAt = recentVisitFingerprints.get(fingerprint) || 0;
+      // 1. GENUINE PROJECT VIEW RECORDING
+      if (action === 'view' && projectId) {
+        // Fingerprint per session/IP and project
+        const fingerprint = sessionId
+          ? `view:${sessionId}:${projectId}`
+          : `view:${clientIp}:${projectId}`;
+        const lastVisitAt = recentVisitFingerprints.get(fingerprint) || 0;
 
-      // Duplicate protection: if visit occurred within cooldown, do not count as a new website opening
-      if (now - lastVisitAt < COOLDOWN_MS) {
-        const currentViews = await getProfileViews();
+        // Duplicate protection: if this project was visited within cooldown, do not inflate view count
+        if (now - lastVisitAt < COOLDOWN_MS) {
+          const stats = await getProjectStatistics();
+          return res.status(200).json({
+            ok: true,
+            incremented: false,
+            message: 'Project view already recorded in this session.',
+            projectViews: stats.projectViews,
+            appreciations: stats.appreciations,
+            views: stats.projectViews,
+            byProject: stats.byProject,
+          });
+        }
+
+        // Record this genuine new project view
+        recentVisitFingerprints.set(fingerprint, now);
+        const stats = await recordProjectView(projectId);
+
         return res.status(200).json({
           ok: true,
-          views: currentViews,
-          incremented: false,
-          message: 'Session visit already recorded.',
+          incremented: true,
+          projectViews: stats.projectViews,
+          appreciations: stats.appreciations,
+          views: stats.projectViews,
+          byProject: stats.byProject,
         });
       }
 
-      // Record this genuine new website visit
-      recentVisitFingerprints.set(fingerprint, now);
-      const nextViews = await incrementProfileViews();
+      // 2. PROJECT APPRECIATION
+      if (action === 'appreciate' && projectId) {
+        const stats = await recordProjectAppreciation(projectId, 1);
+        return res.status(200).json({
+          ok: true,
+          incremented: true,
+          projectViews: stats.projectViews,
+          appreciations: stats.appreciations,
+          views: stats.projectViews,
+          byProject: stats.byProject,
+        });
+      }
 
+      // 3. PROJECT UN-APPRECIATION (UNDO)
+      if (action === 'unappreciate' && projectId) {
+        const stats = await recordProjectAppreciation(projectId, -1);
+        return res.status(200).json({
+          ok: true,
+          incremented: false,
+          projectViews: stats.projectViews,
+          appreciations: stats.appreciations,
+          views: stats.projectViews,
+          byProject: stats.byProject,
+        });
+      }
+
+      // Return authoritative statistics
+      const stats = await getProjectStatistics();
       return res.status(200).json({
         ok: true,
-        views: nextViews,
-        incremented: true,
+        projectViews: stats.projectViews,
+        appreciations: stats.appreciations,
+        views: stats.projectViews,
+        byProject: stats.byProject,
       });
     }
 
     return res.status(405).json({ ok: false, error: 'Method Not Allowed' });
   } catch (err) {
     console.error('Views handler error:', err);
-    return res.status(500).json({ ok: false, error: 'Failed to process views' });
+    return res.status(500).json({ ok: false, error: 'Failed to process statistics' });
   }
 }
